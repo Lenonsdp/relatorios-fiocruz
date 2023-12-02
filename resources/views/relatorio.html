@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Relatório com Filtros</title>
+	<!-- Inclua o Bootstrap CSS -->
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+
+<div class="container mt-4">
+	<h2>Relatório com Filtros</h2>
+	<form id="filterForm">
+		<div class="form-row">
+			<div class="col-md-3">
+				<label for="startDate">Data Inicial</label>
+				<input type="date" class="form-control" id="startDate" name="startDate">
+			</div>
+			<div class="col-md-3">
+				<label for="endDate">Data Final</label>
+				<input type="date" class="form-control" id="endDate" name="endDate">
+			</div>
+			<div class="col-md-3">
+				<label for="operator">Operador</label>
+				<select class="form-control" id="operator" name="operator">
+					<option value="">Selecione...</option>
+					<option value="Operator 1">Operador 1</option>
+					<option value="Operator 2">Operador 2</option>
+					<!-- Adicione outras opções conforme necessário -->
+				</select>
+			</div>
+			<div class="col-md-3">
+				<label for="lot">Lote</label>
+				<input type="text" class="form-control" id="lot" name="lot">
+			</div>
+		</div>
+		<div class="form-row mt-3">
+			<div class="col-md-2">
+				<button type="submit" class="btn btn-primary btn-block">Gerar Relatório</button>
+			</div>
+		</div>
+	</form>
+
+	<!-- Tabela para exibir os resultados -->
+	<div class="mt-4" id="reportDataCabecalho">
+		<table class="table">
+			<thead>
+			<tr>
+				<th>Usuário</th>
+				<th>Status ciclo</th>
+				<th>Receita</th>
+				<th>Lote</th>
+				<th>Reator</th>
+				<th>Data inicial Batelada</th>
+				<th>Data final Batelada</th>
+				<th>Velocidade receita</th>
+				<th>Temperatura receita</th>
+				<th>PH Receita</th>
+			</tr>
+			</thead>
+			<tbody id="reportTableCabecalhoBody">
+			<!-- Os dados da tabela serão populados aqui -->
+			</tbody>
+		</table>
+	</div>
+	<!-- Tabela para exibir os resultados -->
+	<div class="mt-4" id="reportData">
+		<table class="table">
+			<thead>
+			<tr>
+				<th>Data e hora inicial da fase</th>
+				<th>Data e hora final da fase</th>
+				<th>Tempo de execução</th>
+				<th>Tempo de inatividade</th>
+
+				<th>Fase</th>
+				<th>Data e Hora</th>
+				<th>Rotação</th>
+				<th>Temperatura</th>
+				<th>PH</th>
+			</tr>
+			</thead>
+			<tbody id="reportTableBody">
+			<!-- Os dados da tabela serão populados aqui -->
+			</tbody>
+		</table>
+	</div>
+</div>
+
+<!-- Inclua o Bootstrap JS (opcional, para funcionalidades extras do Bootstrap) -->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<!-- Inclua o jQuery (caso necessário para funcionalidades do Bootstrap) -->
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<!-- Inclua seu código JavaScript personalizado -->
+<script>
+	// Adicione seu código JavaScript para processar o formulário aqui
+	$('#filterForm').submit(function (e) {
+		e.preventDefault();
+
+		// Obtenha os valores dos campos do formulário
+		let startDate = $('#startDate').val();
+		let endDate = $('#endDate').val();
+		let operator = $('#operator').val();
+		let lot = $('#lot').val();
+
+		// Enviar os dados para o backend (você precisará de uma rota no Laravel para processar esses dados)
+		$.ajax({
+			method: 'GET',
+			url: '/relatorio', // Substitua pelo seu endpoint no Laravel
+			data: {
+				startDate: startDate,
+				endDate: endDate,
+				operator: operator,
+				lot: lot
+			},
+			success: function (response) {
+                debugger
+				// Atualize o conteúdo da div de relatório com os dados retornados pelo backend
+				$('#reportData').html(response);
+			},
+			error: function (error) {
+                debugger
+				console.error(error);
+			}
+		});
+	});
+
+	 // Exemplo de dados para preencher a tabela (apenas para ilustração)
+	 let sampleData = [
+		{ fase: 'Fase 1', dataHora: '2023-12-01 10:00:00', rotacao: 150, temperatura: 25, ph: 7, dataIni: '2023-12-01 10:00:00', dataFim: '2023-12-01 10:00:00', timeExecucao: 1, timeIna: 1 },
+		{ fase: 'Fase 2', dataHora: '2023-12-02 11:30:00', rotacao: 160, temperatura: 26, ph: 7.5, dataIni: '2023-12-01 10:00:00', dataFim: '2023-12-01 10:00:00', timeExecucao: 1, timeIna: 1  },
+		// Adicione mais dados conforme necessário
+	];
+
+	// Simulação de uma resposta bem-sucedida do backend com os dados da tabela
+	function fillTable(data) {
+		let tableBody = $('#reportTableBody');
+		tableBody.empty(); // Limpa o conteúdo atual da tabela
+
+		// Preenche a tabela com os dados recebidos
+		data.forEach(function (row) {
+			let rowHtml = `<tr>
+								<td>${row.dataIni}</td>
+								<td>${row.dataFim}</td>
+								<td>${row.timeExecucao}</td>
+								<td>${row.timeIna}</td>
+								<td>${row.fase}</td>
+								<td>${row.dataHora}</td>
+								<td>${row.rotacao}</td>
+								<td>${row.temperatura}</td>
+								<td>${row.ph}</td>
+						   </tr>`;
+			tableBody.append(rowHtml);
+		});
+	}
+
+	// Chamada de função para preencher a tabela (apenas para simulação)
+	fillTable(sampleData);
+</script>
+</body>
+</html>
