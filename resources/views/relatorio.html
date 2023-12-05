@@ -12,15 +12,19 @@
 	<h2>Relatório com Filtros</h2>
 	<form id="filterForm">
 		<div class="form-row">
-			<div class="col-md-3">
+			<div class="col-md-2">
 				<label for="startDate">Data Inicial</label>
 				<input type="date" class="form-control" id="startDate" name="startDate">
 			</div>
-			<div class="col-md-3">
+			<div class="col-md-2">
 				<label for="endDate">Data Final</label>
 				<input type="date" class="form-control" id="endDate" name="endDate">
 			</div>
-			<div class="col-md-3">
+            <div class="col-md-3">
+				<label for="Ciclo">Ciclo</label>
+				<input type="text" class="form-control" id="ciclo" name="ciclo">
+			</div>
+			<div class="col-md-2">
 				<label for="operator">Operador</label>
 				<select class="form-control" id="operator" name="operator">
 					<option value="">Selecione...</option>
@@ -85,6 +89,16 @@
 			</tbody>
 		</table>
 	</div>
+
+        <!-- Adicione os botões para download -->
+    <div class="form-row mt-3">
+        <div class="col-md-2">
+            <button id="downloadPDF" class="btn btn-secondary btn-block">Baixar PDF</button>
+        </div>
+        <div class="col-md-2">
+            <button id="downloadExcel" class="btn btn-secondary btn-block">Baixar Excel</button>
+        </div>
+    </div>
 </div>
 
 <!-- Inclua o Bootstrap JS (opcional, para funcionalidades extras do Bootstrap) -->
@@ -111,12 +125,11 @@
 				startDate: startDate,
 				endDate: endDate,
 				operator: operator,
-				lot: lot
+				lote: lot
 			},
 			success: function (response) {
                 debugger
-				// Atualize o conteúdo da div de relatório com os dados retornados pelo backend
-				$('#reportData').html(response);
+				fillTable();
 			},
 			error: function (error) {
                 debugger
@@ -124,13 +137,6 @@
 			}
 		});
 	});
-
-	 // Exemplo de dados para preencher a tabela (apenas para ilustração)
-	 let sampleData = [
-		{ fase: 'Fase 1', dataHora: '2023-12-01 10:00:00', rotacao: 150, temperatura: 25, ph: 7, dataIni: '2023-12-01 10:00:00', dataFim: '2023-12-01 10:00:00', timeExecucao: 1, timeIna: 1 },
-		{ fase: 'Fase 2', dataHora: '2023-12-02 11:30:00', rotacao: 160, temperatura: 26, ph: 7.5, dataIni: '2023-12-01 10:00:00', dataFim: '2023-12-01 10:00:00', timeExecucao: 1, timeIna: 1  },
-		// Adicione mais dados conforme necessário
-	];
 
 	// Simulação de uma resposta bem-sucedida do backend com os dados da tabela
 	function fillTable(data) {
@@ -156,6 +162,36 @@
 
 	// Chamada de função para preencher a tabela (apenas para simulação)
 	fillTable(sampleData);
+
+       // Adicione os eventos de clique para os botões de download
+       $('#downloadPDF').on('click', function() {
+        downloadPDF();
+    });
+
+    $('#downloadExcel').on('click', function() {
+        downloadExcel();
+    });
+
+    // Função para baixar em PDF
+    function downloadPDF() {
+        const pdf = new jsPDF();
+        const table = document.getElementById('reportData').querySelector('table');
+
+        // Cria PDF a partir da tabela
+        pdf.autoTable({ html: table });
+
+        // Salva o PDF
+        pdf.save('relatorio.pdf');
+    }
+
+    // Função para baixar em Excel
+    function downloadExcel() {
+        TableExport(document.getElementById('reportData').querySelector('table'), {
+            formats: ['xlsx'],
+            filename: 'relatorio',
+            exportButtons: false
+        }).export();
+    }
 </script>
 </body>
 </html>
