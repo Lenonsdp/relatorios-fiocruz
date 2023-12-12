@@ -78,22 +78,22 @@ return [
             'sslmode' => 'prefer',
         ],
 
-        'sqlsrv' => [
+        'relatorio' => [
             'driver' => 'sqlsrv',
             'host' => 'localhost',
             'port' => '1433',
-            'database' => 'mydb',
+            'database' => 'relatorio',
             'username' => 'SA',
             'password' => 'Contraseña12345678',
             'charset' => 'utf8',
             'prefix' => '',
             'prefix_indexes' => true,
         ],
-        'sqlsrv2' => [
+        'alarme' => [
             'driver' => 'sqlsrv',
             'host' => 'localhost',
             'port' => '1433',
-            'database' => 'mydb2',
+            'database' => 'alarme',
             'username' => 'SA',
             'password' => 'Contraseña12345678',
             'charset' => 'utf8',
