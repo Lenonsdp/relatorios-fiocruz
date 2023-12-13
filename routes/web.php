@@ -55,42 +55,96 @@ Route::get('/relatorio', function (\Illuminate\Http\Request $request) {
 			return $query->where('Val', $operator)->where('TagIndex', 7);
 		})
 		->get();
-
 	if ($result_datas[0]->MinDate == null) {
 		return [];
 	}
 
 	$result_lotes = $connection->table('StringTable')
 	->selectRaw('distinct Val')
-		->where('Val', 'LIKE', $sanitizedData['lote'])
+		->when($sanitizedData['lote'], function ($query, $lote) {
+			return $query->where('Val', 'LIKE', $lote)->where('TagIndex', 8);
+		})
+		->when($sanitizedData['operator'], function ($query, $operator) {
+			return $query->where('Val', $operator)->where('TagIndex', 7);
+		})
 		->where('TagIndex', 8)
 		->where('DateAndTime', '>', $result_datas[0]->MinDate)
 		->where('DateAndTime', '<', $result_datas[0]->MaxDate)
 		->get();
 	if (count($result_lotes) > 1) {
 		foreach($result_lotes as $result_lote) {
-			return $result_lote;
+			if ($result_lote->Val == null || empty(trim($result_lote->Val))) {
+				continue;
+			}
 			$resultMultipleLotesData = $connection->table('StringTable')
 			->selectRaw('MIN(DateAndTime) as MinDate, MAX(DateAndTime) as MaxDate')
+			->where('Val', 'LIKE', $result_lote->Val)
 			->get();
-
-			$result[$result_lote->Val] = $connection->table('StringTable')
+			$result[$result_lote->Val]['StringTable'] = $connection->table('StringTable')
 			->select('*')
-			->where('DateAndTime', '>', $$resultMultipleLotesData[0]->MinDate)
-			->where('DateAndTime', '<', $$resultMultipleLotesData[0]->MaxDate)
+			->where('DateAndTime', '>', $resultMultipleLotesData[0]->MinDate)
+			->where('DateAndTime', '<', $resultMultipleLotesData[0]->MaxDate)
 			->get();
 
-			$result[$result_lote->Val] = $connection->table('FloatTable')
+			$result[$result_lote->Val]['FloatTable'] = $connection->table('FloatTable')
 				->select('*')
-				->where('DateAndTime', '>', $$resultMultipleLotesData[0]->MinDate)
-				->where('DateAndTime', '<', $$resultMultipleLotesData[0]->MaxDate)
+				->where('DateAndTime', '>', $resultMultipleLotesData[0]->MinDate)
+				->where('DateAndTime', '<', $resultMultipleLotesData[0]->MaxDate)
 				->get();
 			// $resultAlarme = $connection2->table('Alarme')
 			// 	->select('*')
 			// 	->where('DateAndTime', '>', $result_datas[0]->MinDate)
 			// 	->where('DateAndTime', '<', $result_datas[0]->MaxDate)
 			// 	->get();
+
+
+			$result[$result_lote->Val]['dataMin'] = $resultMultipleLotesData[0]->MinDate;
+			$result[$result_lote->Val]['dataMax'] = $resultMultipleLotesData[0]->MaxDate;
+			foreach($result as $lote) {
+				foreach($lote['StringTable'] as $stringTable) {
+					$result[$result_lote->Val]['DataIndex'][$stringTable->DateAndTime][] = $stringTable;
+				}
+				foreach($lote['FloatTable'] as $floatTable) {
+					$result[$result_lote->Val]['DataIndex'][$floatTable->DateAndTime][] = $floatTable;
+				}
+			}
+
+			foreach($result[$result_lote->Val]['DataIndex'] as $dataIndex) {
+				foreach($dataIndex as $data) {
+					if ($data->TagIndex == 0) {
+						$result[$result_lote->Val]['Ciclo_ok_nok'] = $data->Val;
+					} else if ($data->TagIndex == 1) {
+						$result[$result_lote->Val]['ID_Dorna'] = $data->Val;
+					} else if ($data->TagIndex == 13) {
+						$result[$result_lote->Val]['Nome_receita'] = $data->Val;
+					} else if ($data->TagIndex == 7) {
+						$result[$result_lote->Val]['NomeUsuario'] = $data->Val;
+					} else if ($data->TagIndex == 8) {
+						$result[$result_lote->Val]['Num_Lote'] = $data->Val;
+					} else if ($data->TagIndex == 9) {
+						$result[$result_lote->Val]['Fase'][$data->Val][] = $data->DateAndTime;
+					} else if ($data->TagIndex == 2) {
+						$result[$result_lote->Val]['PH_receita'] = $data->Val;
+					} else if ($data->TagIndex == 3) {
+						$result[$result_lote->Val]['Temperatura_receita'] = $data->Val;
+					} else if ($data->TagIndex == 4) {
+						$result[$result_lote->Val]['Tempo_execucao'][$data->DateAndTime] = $data->Val;
+					} else if ($data->TagIndex == 5) {
+						$result[$result_lote->Val]['Tempo_inativo'][$data->DateAndTime] = $data->Val;
+					} else if ($data->TagIndex == 6) {
+						$result[$result_lote->Val]['Veloc_receita'] = $data->Val;
+					} else if ($data->TagIndex == 10) {
+						$result[$result_lote->Val]['PH'][$data->DateAndTime] = $data->Val;
+					} else if ($data->TagIndex == 11) {
+						$result[$result_lote->Val]['Temperatura'][$data->DateAndTime] = $data->Val;
+					} else if ($data->TagIndex == 12) {
+						$result[$result_lote->Val]['Velocidade'][$data->DateAndTime] = $data->Val;
+					}
+				}
+			}
+			unset($result[$result_lote->Val]['DataIndex']);
 		}
+		return $result;
 	} else if (count($result_lotes) == 1){
 		$result[$result_lotes[0]->Val]['StringTable'] = $connection->table('StringTable')
 		->select('*')
@@ -133,15 +187,15 @@ Route::get('/relatorio', function (\Illuminate\Http\Request $request) {
 				} else if ($data->TagIndex == 9) {
 					$result[$result_lotes[0]->Val]['Fase'][$data->Val][] = $data->DateAndTime;
 				} else if ($data->TagIndex == 2) {
-					$result[$result_lotes[0]->Val]['PH_receita'][$data->DateAndTime] = $data->Val;
+					$result[$result_lotes[0]->Val]['PH_receita'] = $data->Val;
 				} else if ($data->TagIndex == 3) {
-					$result[$result_lotes[0]->Val]['Temperatura_receita'][$data->DateAndTime] = $data->Val;
+					$result[$result_lotes[0]->Val]['Temperatura_receita'] = $data->Val;
 				} else if ($data->TagIndex == 4) {
 					$result[$result_lotes[0]->Val]['Tempo_execucao'][$data->DateAndTime] = $data->Val;
 				} else if ($data->TagIndex == 5) {
 					$result[$result_lotes[0]->Val]['Tempo_inativo'][$data->DateAndTime] = $data->Val;
 				} else if ($data->TagIndex == 6) {
-					$result[$result_lotes[0]->Val]['Veloc_receita'][$data->DateAndTime] = $data->Val;
+					$result[$result_lotes[0]->Val]['Veloc_receita'] = $data->Val;
 				} else if ($data->TagIndex == 10) {
 					$result[$result_lotes[0]->Val]['PH'][$data->DateAndTime] = $data->Val;
 				} else if ($data->TagIndex == 11) {
@@ -152,30 +206,12 @@ Route::get('/relatorio', function (\Illuminate\Http\Request $request) {
 			}
 		}
 		unset($result[$result_lotes[0]->Val]['DataIndex']);
-		return $result;
 		// $resultAlarme = $connection2->table('Alarme')
 		// 	->select('*')
 		// 	->where('DateAndTime', '>', $result_datas[0]->MinDate)
 		// 	->where('DateAndTime', '<', $result_datas[0]->MaxDate)
 		// 	->get();
 	}
-
-// --Relatorios\Ciclo_ok_nok	0 S
-// --Relatorios\ID_Dorna	1 S
-// --Receitas\Nome_receita	13 S
-// --NomeUsuario	7 S
-// --Num_Lote	8 S
-// --Receitas\Fase	9 S
-
-
-// --Relatorios\PH_receita	2 F
-// --Relatorios\Temperatura_receita	3 F
-// --Relatorios\Tempo_execucao	4 F
-// --Relatorios\Tempo_inativo	5 F
-// --Relatorios\Veloc_receita	6 F
-// --Relatorios\PH	10 F
-// --Relatorios\Temperatura	11 F
-// --Relatorios\Velocidade	12  F
 
 	return $result;
 

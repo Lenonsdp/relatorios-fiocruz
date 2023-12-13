@@ -11,72 +11,34 @@
 	<h2>Relatório com Filtros</h2>
 	<form id="filterForm">
 		<div class="form-row">
-			<div class="col-md-2">
+			<div class="col-md-3 mb-3">
 				<label for="startDate">Data Inicial</label>
-				<input type="date" class="form-control" id="startDate" name="startDate">
+				<input type="date" class="form-control" id="startDate" name="startDate" placeholder="Data Inicial">
 			</div>
-			<div class="col-md-2">
+			<div class="col-md-3 mb-3">
 				<label for="endDate">Data Final</label>
-				<input type="date" class="form-control" id="endDate" name="endDate">
+				<input type="date" class="form-control" id="endDate" name="endDate" placeholder="Data Final">
 			</div>
-			<div class="col-md-2">
+			<div class="col-md-3 mb-3">
 				<label for="operator">Operador</label>
 				<input type="text" class="form-control" id="operator" name="operator">
 			</div>
-			<div class="col-md-3">
+			<div class="col-md-3 mb-3">
 				<label for="lot">Lote</label>
 				<input type="text" class="form-control" id="lot" name="lot">
 			</div>
 		</div>
-		<div class="form-row mt-3">
-			<div class="col-md-2">
+		<div class="form-row">
+			<div class="col-md-3">
 				<button type="submit" class="btn btn-primary btn-block">Gerar Relatório</button>
 			</div>
 		</div>
 	</form>
 
-	<div class="mt-4" id="reportDataCabecalho">
-		<table class="table">
-			<thead>
-			<tr>
-				<th>Usuário</th>
-				<th>Status ciclo</th>
-				<th>Receita</th>
-				<th>Lote</th>
-				<th>Reator</th>
-				<th>Data inicial Batelada</th>
-				<th>Data final Batelada</th>
-				<th>Velocidade receita</th>
-				<th>Temperatura receita</th>
-				<th>PH Receita</th>
-			</tr>
-			</thead>
-			<tbody id="reportTableCabecalhoBody"></tbody>
-		</table>
-	</div>
-	<!-- Tabela para exibir os resultados -->
-	<div class="mt-4" id="reportData">
-		<table class="table">
-			<thead>
-			<tr>
-				<th>Data e hora inicial da fase</th>
-				<th>Data e hora final da fase</th>
-				<th>Tempo de execução</th>
-				<th>Tempo de inatividade</th>
 
-				<th>Fase</th>
-				<th>Data e Hora</th>
-				<th>Rotação</th>
-				<th>Temperatura</th>
-				<th>PH</th>
-			</tr>
-			</thead>
-			<tbody id="reportTableBody"></tbody>
-		</table>
-	</div>
-
-		<!-- Adicione os botões para download -->
-	<div class="form-row mt-3">
+	<div class="mt-4" id="reportDataCabecalho"></div>
+	<div class="mt-4" id="reportTableBody"></div>
+	<!-- <div class="form-row mt-3">
 		<div class="col-md-2">
 			<button id="downloadPDF" class="btn btn-secondary btn-block">Baixar PDF</button>
 		</div>
@@ -84,16 +46,15 @@
 		<div class="col-md-2">
 			<button id="downloadExcel" class="btn btn-secondary btn-block">Baixar Excel</button>
 		</div>
-	</div>
+	</div> -->
 </div>
 
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.4.1/jspdf.debug.js"></script>
+<script src="../css/app.css"></script>
 <script>
-	// Adicione seu código JavaScript para processar o formulário aqui
 	$('#filterForm').submit(function (e) {
 		e.preventDefault();
-
 		let startDate = $('#startDate').val();
 		let endDate = $('#endDate').val();
 		let operator = $('#operator').val();
@@ -109,6 +70,7 @@
 				lote: lot
 			},
 			success: function (response) {
+				debugger
 				fillTable(response);
 			},
 			error: function (error) {
@@ -117,12 +79,6 @@
 			}
 		});
 	});
-
-	function getValueRow(data, dataIni, dataFim, indice) {
-
-
-	}
-
 	function fillTable(data) {
 		if (data.length === 0) {
 			alert('Nenhum registro encontrado');
@@ -130,56 +86,99 @@
 		}
 		var fases = [];
 
-
 		for (index in data) {
 			for (index2 in data[index]['Fase']) {
 				fases.push({'fase': index2, 'valorMin': data[index]['Fase'][index2][0], 'valorMax': data[index]['Fase'][index2].pop()});
 			}
-
-
-			debugger
-			let reportTableCabecalhoBody = $('#reportTableCabecalhoBody');
-			reportTableCabecalhoBody.empty();
+			$('#reportTableCabecalhoBody, #reportDataCabecalho').empty();
 			Object.values(data).forEach(function (row) {
-				debugger
-				let rowHtml = `<tr>
-									<td>${row.NomeUsuario}</td>
-									<td>${row.Ciclo_ok_nok}</td>
-									<td>${row.Nome_receita}</td>
-									<td>${row.Num_Lote}</td>
-									<td>${row.ID_Dorna}</td>
-									<td>${row.dataMin}</td>
-									<td>${row.dataMax}</td>
-									<td>${row.velocidadeReceita}</td>
-									<td>${row.temperaturaReceita}</td>
-									<td>${row.phReceita}</td>
-							</tr>`;
-				reportTableCabecalhoBody.append(rowHtml);
-			});
+				let table = $('<table>', { class: 'table' }).append(
+					$('<thead>').append(
+						$('<tr>').append(
+							$('<th>', { text: 'Usuário' }),
+							$('<th>', { text: 'Status ciclo' }),
+							$('<th>', { text: 'Receita' }),
+							$('<th>', { text: 'Lote' }),
+							$('<th>', { text: 'Reator' }),
+							$('<th>', { text: 'Data inicial Batelada' }),
+							$('<th>', { text: 'Data final Batelada' }),
+							$('<th>', { text: 'Velocidade receita' }),
+							$('<th>', { text: 'Temperatura receita' }),
+							$('<th>', { text: 'PH Receita' })
+						)
+					),
+					$('<tbody>', { id: 'reportTableCabecalhoBody' })
+				);
 
+				$('#reportDataCabecalho').append(table);
 
+				let rowHtml = $('<tr>').append(
+					$('<td>', { text: row.NomeUsuario }),
+					$('<td>', { text: row.Ciclo_ok_nok }),
+					$('<td>', { text: row.Nome_receita }),
+					$('<td>', { text: row.Num_Lote }),
+					$('<td>', { text: row.ID_Dorna }),
+					$('<td>', { text: row.dataMin }),
+					$('<td>', { text: row.dataMax }),
+					$('<td>', { text: row.Veloc_receita }),
+					$('<td>', { text: row.Temperatura_receita }),
+					$('<td>', { text: row.PH_receita })
+				);
 
-			let tableBody = $('#reportTableBody');
-			tableBody.empty();
+				$('#reportTableCabecalhoBody').append(rowHtml);
 
-			$i = 1;
-			Object.values(fases).forEach(function (row) {
-				debugger
-				let rowHtml = `<tr>
-									<td>${row.dataMin}</td>
-									<td>${row.dataMax}</td>
-									<td>${getValueRow(data[index], row.dataMin, row.dataMax, 'Tempo_execucao')}</td>
-									<td><td>${getValueRow(data[index], row.dataMin, row.dataMax, 'Tempo_inativo')}</td>
-									<td>${row.fase}</td>
-									<td>${getValueRow(data[index], row.dataMin, row.dataMax, 'DateAndTime')}</td>
-									<td>${getValueRow(data[index], row.dataMin, row.dataMax, 'rotacao')}</td>
-									<td>${getValueRow(data[index], row.dataMin, row.dataMax, 'temperatura')}</td>
-									<td>${getValueRow(data[index], row.dataMin, row.dataMax, 'ph')}</td>
-							</tr>`;
-				$i++;
-				tableBody.append(rowHtml);
+				$('#reportTableBody').empty();
+				i = 1;
+				Object.values(fases).forEach(function (row) {
+					debugger
+					let headerRowHtml = $('<table>', { class: 'table', 'id': i}).append(
+						$('<thead>').append(
+							$('<th>', { text: 'Fase' }),
+							$('<th>', { text: 'Data e hora inicial' }),
+							$('<th>', { text: 'Data e hora final' }),
+							$('<th>', { text: 'Tempo de execução' }),
+							$('<th>', { text: 'Tempo de inatividade' }),
+							$('<th>', { text: 'Data e Hora' }),
+							$('<th>', { text: 'Rotação' }),
+							$('<th>', { text: 'Temperatura' }),
+							$('<th>', { text: 'PH' })
+						),
+						$('<tbody>', { id: 'tableBody' }).append(
+							getValueRow(row.fase, row.valorMin, row.valorMax, data, i)
+						)
+					);
+					$('#reportTableBody').append(headerRowHtml);
+					i++;
+				});
 			});
 		}
+	}
+
+	function getValueRow(fase, dataIni, dataFim, data, indice) {
+		var rows = [];
+		var firstRow = true;
+		var cells = [];
+		for (index in data) {
+			for (index2 in data[index]['PH']) {
+				if (index2 >= dataIni || index2 <= dataFim) {
+					var cells = [
+						$('<td>', { text: indice +'°  ' + fase }),
+						$('<td>', { text: dataIni }),
+						$('<td>', { text: dataFim }),
+						$('<td>', { text: data[index]['Tempo_execucao'][index2] }),
+						$('<td>', { text: data[index]['Tempo_inativo'][index2] }),
+						$('<td>', { text: index2 }),
+						$('<td>', { text: data[index]['Velocidade'][index2] }),
+						$('<td>', { text: data[index]['Temperatura'][index2] }),
+						$('<td>', { text: data[index]['PH'][index2] })
+					];
+					rows.push($('<tr>').append(cells));
+					var firstRow = false;
+				}
+			}
+		}
+
+		return rows;
 	}
 
 	var doc = new jsPDF('l', 'mm', 'a4');
