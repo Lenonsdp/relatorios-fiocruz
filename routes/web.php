@@ -34,25 +34,25 @@ Route::get('/relatorio', function (\Illuminate\Http\Request $request) {
 		'dateStart' => $request->input('startDate'),
 		'dateEnd' => $request->input('endDate'),
 		'operator' => $request->input('operator'),
-		'lote' => $request->input('lote'),
-		'ciclo' => $request->input('ciclo')
+		'lote' => $request->input('lote')
 	];
 	$sanitizedData = array_map('htmlspecialchars', $data);
 	$connection = DB::connection('relatorio');
 	$connection2 = DB::connection('alarme');
+	$result = [];
 	$result_datas = $connection->table('StringTable')
 	->selectRaw('MIN(DateAndTime) as MinDate, MAX(DateAndTime) as MaxDate')
-		->when($sanitizedData['dateStart'], function ($query, $DateAndTime) {
-			return $query->where('DateAndTime', '>', $DateAndTime);
+		->when($sanitizedData['dateStart'] && $sanitizedData['dateEnd'], function ($query) use ($sanitizedData) {
+			return $query->whereBetween('DateAndTime', [formatDataBD($sanitizedData['dateStart']) . ' 00:00:00', formatDataBD($sanitizedData['dateEnd']) . ' 23:59:59']);
 		})
-		->when($sanitizedData['dateEnd'], function ($query, $DateAndTime) {
-			return $query->where('DateAndTime', '<', $DateAndTime);
-		})
-		->when($sanitizedData['lote'], function ($query, $lote) {
-			return $query->where('Val', 'LIKE', $lote)->where('TagIndex', 8);
-		})
-		->when($sanitizedData['operator'], function ($query, $operator) {
-			return $query->where('Val', $operator)->where('TagIndex', 7);
+		->when($sanitizedData['lote'] || $sanitizedData['operator'], function ($query) use ($sanitizedData) {
+			return $query->where(function ($query) use ($sanitizedData) {
+				if ($sanitizedData['lote']) {
+					$query->orWhere('Val', 'LIKE', $sanitizedData['lote'])->where('TagIndex', 8);
+				} else if ($sanitizedData['operator']) {
+					$query->orWhere('Val', $sanitizedData['operator'])->where('TagIndex', 7);
+				}
+			});
 		})
 		->get();
 	if ($result_datas[0]->MinDate == null) {
@@ -61,17 +61,21 @@ Route::get('/relatorio', function (\Illuminate\Http\Request $request) {
 
 	$result_lotes = $connection->table('StringTable')
 	->selectRaw('distinct Val')
-		->when($sanitizedData['lote'], function ($query, $lote) {
-			return $query->where('Val', 'LIKE', $lote)->where('TagIndex', 8);
-		})
-		->when($sanitizedData['operator'], function ($query, $operator) {
-			return $query->where('Val', $operator)->where('TagIndex', 7);
-		})
+		// ->when($sanitizedData['lote'] || $sanitizedData['operator'], function ($query) use ($sanitizedData) {
+		// 	return $query->where(function ($query) use ($sanitizedData) {
+		// 		if ($sanitizedData['lote']) {
+		// 			$query->orWhere('Val', 'LIKE', $sanitizedData['lote'])->where('TagIndex', 8);
+		// 		} else if ($sanitizedData['operator']) {
+		// 			$query->orWhere('Val', $sanitizedData['operator'])->where('TagIndex', 7);
+		// 		}
+		// 	});
+		// })
 		->where('TagIndex', 8)
 		->where('DateAndTime', '>', $result_datas[0]->MinDate)
 		->where('DateAndTime', '<', $result_datas[0]->MaxDate)
 		->get();
 	if (count($result_lotes) > 1) {
+		$i = 0;
 		foreach($result_lotes as $result_lote) {
 			if ($result_lote->Val == null || empty(trim($result_lote->Val))) {
 				continue;
@@ -91,12 +95,22 @@ Route::get('/relatorio', function (\Illuminate\Http\Request $request) {
 				->where('DateAndTime', '>', $resultMultipleLotesData[0]->MinDate)
 				->where('DateAndTime', '<', $resultMultipleLotesData[0]->MaxDate)
 				->get();
-			// $resultAlarme = $connection2->table('Alarme')
-			// 	->select('*')
-			// 	->where('DateAndTime', '>', $result_datas[0]->MinDate)
-			// 	->where('DateAndTime', '<', $result_datas[0]->MaxDate)
-			// 	->get();
 
+			$result[$result_lote->Val]['Alarme'] = $connection2->table('AllEvent')
+				->select(
+					'ServerName',
+					'EventTimeStamp',
+					'EventCategory',
+					'severity',
+					'Message',
+					'Priority',
+					'Active',
+					'Acked',
+					'ConditionName'
+				)
+				->whereBetween('EventTimeStamp', [$result_datas[0]->MinDate, $result_datas[0]->MaxDate])
+				->where('Message', 'LIKE', 'Alarme:%')
+				->get();
 
 			$result[$result_lote->Val]['dataMin'] = $resultMultipleLotesData[0]->MinDate;
 			$result[$result_lote->Val]['dataMax'] = $resultMultipleLotesData[0]->MaxDate;
@@ -142,10 +156,16 @@ Route::get('/relatorio', function (\Illuminate\Http\Request $request) {
 					}
 				}
 			}
-			unset($result[$result_lote->Val]['DataIndex']);
+			$i++;
 		}
-		return $result;
-	} else if (count($result_lotes) == 1){
+		foreach($result as &$lote) {
+			foreach($lote as &$val) {
+				unset($lote['StringTable']);
+				unset($lote['FloatTable']);
+				unset($lote['DataIndex']);
+			}
+		}
+	} else if (count($result_lotes) == 1) {
 		$result[$result_lotes[0]->Val]['StringTable'] = $connection->table('StringTable')
 		->select('*')
 		->where('DateAndTime', '>', $result_datas[0]->MinDate)
@@ -206,13 +226,94 @@ Route::get('/relatorio', function (\Illuminate\Http\Request $request) {
 			}
 		}
 		unset($result[$result_lotes[0]->Val]['DataIndex']);
-		// $resultAlarme = $connection2->table('Alarme')
-		// 	->select('*')
-		// 	->where('DateAndTime', '>', $result_datas[0]->MinDate)
-		// 	->where('DateAndTime', '<', $result_datas[0]->MaxDate)
-		// 	->get();
-	}
-
+		$result[$result_lotes[0]->Val]['Alarme'] = $connection2->table('AllEvent')
+			->select(
+				'ServerName',
+				'EventTimeStamp',
+				'EventCategory',
+				'severity',
+				'Message',
+				'Priority',
+				'Active',
+				'Acked',
+				'ConditionName'
+			)
+			->whereBetween('EventTimeStamp', [$result_datas[0]->MinDate, $result_datas[0]->MaxDate])
+			->where('Message', 'LIKE', 'Alarme:%')
+			->get();
+		}
 	return $result;
 
+
 });
+
+function formatDataBD($ts) {
+	if ($ts == '') {
+		return '';
+	}
+	$tmp = cvdate($ts);
+	$d = getdate($tmp);
+	$yr = $d["year"];
+	$mo = $d["mon"];
+	$da = $d["mday"];
+
+    return sprintf("%04d-%02d-%02d", $yr, $mo, $da);
+}
+
+function cvdate($s) {
+	$delimiter = '';
+	$s = str_replace(' de ','/',strtolower($s));
+	if (strpos($s,'-') >0 ) $delimiter = '-';
+	elseif (strpos($s,'/')>0) $delimiter = '/';
+	elseif (strpos($s,' ')>0) $delimiter = ' ';
+	elseif (strpos($s,'.')>0) $delimiter = '.';
+	$s = str_replace(', ',$delimiter,$s);
+	if (empty($delimiter)) return 0;
+	$p1 = strpos($s,$delimiter);
+	$p2 = strpos($s,$delimiter,$p1+1);
+	$a = substr($s,$p2+1);
+	$m = substr($s,$p1+1,$p2-($p1+1));
+	$d = substr($s,0,$p1);
+	if (intval($a) < 100) {
+		$a = (intval($a) > 69) ? strval(1900+intval($a)) : strval(2000+intval($a));
+	}
+	if (intval($m) == 0) {
+		return cvdate_portugues($d,$m,$a);
+	} else {
+		return cvdate_numerico($d,$m,$a);
+	}
+}
+
+function cvdate_numerico($d,$m,$y) {
+	$d2 = 0;
+	$m2 = 0;
+	$y2 = 0;
+	$d2 = intval($d);
+	$m2 = intval($m);
+	$y2 = intval($y);
+	if (($d2 == 0) || ($m2 == 0) || ($y2 == 0)) return 0;
+	return mktime(0, 0, 0, $m2, $d2, $y2);
+}
+
+function cvdate_portugues($d,$m,$y) {
+	$d2=0; $m2=0; $y2=0;
+	$d2=intval($d);
+	$m=strtolower($m);
+	switch(substr($m,0,3)) {
+		case 'jan': $m2=1; break;
+		case 'fev': $m2=2; break;
+		case 'mar': $m2=3; break;
+		case 'abr': $m2=4; break;
+		case 'mai': $m2=5; break;
+		case 'jun': $m2=6; break;
+		case 'jul': $m2=7; break;
+		case 'ago': $m2=8; break;
+		case 'set': $m2=9; break;
+		case 'out': $m2=10; break;
+		case 'nov': $m2=11; break;
+		case 'dez': $m2=12; break;
+	}
+	$y2=intval($y);
+	if (($d2==0)||($m2==0)||($y2==0)) return 0;
+	return mktime(0,0,0,$m2,$d2,$y2);
+}
