@@ -22,11 +22,6 @@ body {
 	min-height: 240px;
 }
 
-.btns {
-	color: #fff;
-    background-color: #6c757d;
-	border-color:  #6c757d;
-}
 
 /* Remove o contorno azul nos campos de formulário */
 #filterForm input:focus,
@@ -55,35 +50,22 @@ form label {
 
 }
 
-.bts {
-    color: #6c757d;
-    background-color: #6c757d;
-    border-color:  #6c757d;
-    outline: none;
-    box-shadow: none;
-    transition: none;
+
+.btns {
+	color: #fff !important;
+	background-color: #6c757d  !important;
+	border-color:  #6c757d !important;
 }
 
-.btns:hover {
-    color:  initial;
-    background-color:  #6c757d;
-    border-color:  #6c757d;
-    outline: initial;
-    box-shadow: initial;
-    transition: initial;
-}
-
-.bts:hover, .bts:focus, .bts:active {
-    color: #fff;
-    background-color: #6c757d;
-    border-color:  #6c757d;
-    outline: none;
-    box-shadow: none;
+#downloadPDF {
+	color: #fff !important;
+	background-color: #6c757d  !important;
+	border-color:  none !important;
 }
 
 #filterForm button:focus,
 #filterForm button:active {
-    outline: none;
+	outline: none;
 	box-shadow: none;
 	border: none;
 }
