@@ -48,6 +48,20 @@ $(document).ready(function(){
 					$('.modal-body').text('Nenhum registro encontrado');
 					return;
 				}
+				if (response.manyLotesError) {
+					$('#modal').modal('show');
+					$('.modal-title').text('Aviso');
+					$('.modal-body').text('Sua busca retornou mais de 50 lotes, não foi possível listar os dados, por favor defina um periodo menor');
+					$('.spinner-div').hide();
+					return;
+				}
+				if (response.manyLotesWarning) {
+					$('#modal').modal('show');
+					$('.modal-title').text('Aviso');
+					$('.modal-body').text('Sua busca retornou mais de 30 lotes, por favor, listamos apenas os 30 registros, por favor defina um periodo menor');
+					$('.spinner-div').hide();
+				}
+				delete response.manyLotesWarning;
 				fillTable(response);
 			},
 			error: function (error) {

@@ -4,10 +4,6 @@ namespace App\Services;
 
 use App\Models\AlarmeModel;
 use App\Models\RelatorioModel;
-use Exception;
-use Illuminate\Support\Facades\DB;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 
 class GetRelatorioService extends AbstractService {
 	public function __construct(private RelatorioModel $relatorioModel, private AlarmeModel $alarmeModel) {}
@@ -18,15 +14,21 @@ class GetRelatorioService extends AbstractService {
 
 
 		$result = [];
+		$manyLotes = false;
 		$result_datas = $this->relatorioModel->getDatasMinMaxStringTable($data);
 		if ($result_datas[0]->MinDate == null) {
 			return [];
 		}
 
 		$result_lotes = $this->relatorioModel->getDistinctLotes($result_datas[0]->MinDate, $result_datas[0]->MaxDate);
+		$count = count($result_lotes);
+		if ($count > 50) {
+			return ['manyLotesError' => true];
+		} else if ($count > 25) {
+			$manyLotes = true;
+		}
 
-		if (count($result_lotes) > 1) {
-			$i = 0;
+		if ($count > 1) {
 			foreach($result_lotes as $result_lote) {
 				if ($result_lote->Val == null || empty(trim($result_lote->Val))) {
 					continue;
@@ -38,11 +40,9 @@ class GetRelatorioService extends AbstractService {
 
 				$result[$alias]['FloatTable'] = $this->relatorioModel->getDataFloatTable($resultMultipleLotesData[0]->MinDate, $resultMultipleLotesData[0]->MaxDate);
 				$result[$alias]['Alarme'] = $this->alarmeModel->getDataAlarmeTable($resultMultipleLotesData[0]->MinDate, $resultMultipleLotesData[0]->MaxDate);
-				// return $result;
 				$result[$alias]['dataMin'] = $resultMultipleLotesData[0]->MinDate;
 				$result[$alias]['dataMax'] = $resultMultipleLotesData[0]->MaxDate;
 				$this->parserMultiplyLotes($result, $alias);
-				$i++;
 			}
 			foreach($result as &$lote) {
 				foreach($lote as &$val) {
@@ -66,13 +66,11 @@ class GetRelatorioService extends AbstractService {
 			unset($result[$alias]['DataIndex']);
 		}
 
+		$result['manyLotesWarning'] = $manyLotes;
 		return $result;
 	}
 
 	private function parserMultiplyLotes(&$result, $alias) {
-		// if ($alias == 'Teste 2') {
-		// 	return $result;
-		// }
 		foreach($result as $lote) {
 			foreach($lote['StringTable'] as $stringTable) {
 				if ($stringTable->DateAndTime > $result[$alias]['dataMin'] && $stringTable->DateAndTime < $result[$alias]['dataMax']) {
