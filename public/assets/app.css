@@ -69,3 +69,7 @@ form label {
 	box-shadow: none;
 	border: none;
 }
+
+body.modal-open {
+	padding-right: 0 !important;
+}

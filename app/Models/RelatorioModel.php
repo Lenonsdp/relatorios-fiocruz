@@ -58,19 +58,22 @@ class RelatorioModel {
 
 	}
 
+
 	public function getDataStringTable($dataMin, $dataMax) {
 		$connection = DB::connection('relatorio');
-		return 	$connection->table('StringTable')
-			->select('*')
+		return $connection->table('StringTable')
+			->selectRaw("CONVERT(VARCHAR, DateAndTime, 20) + ':' + CONVERT(VARCHAR, Millitm) AS DateAndTime, Val, TagIndex")
 			->where('DateAndTime', '>', $dataMin)
 			->where('DateAndTime', '<', $dataMax)
 			->get();
 	}
 
+
+
 	public function getDataFloatTable($dataMin, $dataMax) {
 		$connection = DB::connection('relatorio');
 		return 	$connection->table('FloatTable')
-			->select('*')
+		->selectRaw("CONVERT(VARCHAR, DateAndTime, 20) + ':' + CONVERT(VARCHAR, Millitm) AS DateAndTime, Val, TagIndex")
 			->where('DateAndTime', '>', $dataMin)
 			->where('DateAndTime', '<', $dataMax)
 			->get();
