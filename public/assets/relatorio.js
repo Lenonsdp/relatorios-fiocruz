@@ -4,6 +4,29 @@ $(document).ready(function(){
 	$('#startDate, #endDate').datepicker({
 		language: 'pt-BR'
 	});
+	$('#operator').keyboard({
+		usePreview: false,
+		useWheel: false,
+		autoAccept: true,
+		maxLength: 20,
+		restrictInput: true,
+		change: function(e, keyboard, el) {
+		  // Atualize o valor do campo de entrada
+		  $('#operator').val(el.value);
+		}
+	  });
+
+	  $('#lot').keyboard({
+		usePreview: false,
+		useWheel: false,
+		autoAccept: true,
+		maxLength: 20,
+		restrictInput: true,
+		change: function(e, keyboard, el) {
+		  // Atualize o valor do campo de entrada
+		  $('#lot').val(el.value);
+		}
+	  });
 
 	function parseDate(dateString) {
 		var parts = dateString.split('/');
@@ -161,8 +184,6 @@ $(document).ready(function(){
 	function getValueRow(fase, dataIni, dataFim, data, indice) {
 		var rows = [];
 		var cellsTemplate = [
-			$('<td>', { style:'width: 60px;' }),
-			$('<td>', { style:'width: 60px;' }),
 			$('<td>', { style:'width: 150px;' }),
 			$('<td>', { style: 'width: 100px;text-align: end;' }),
 			$('<td>', { style: 'width: 100px;text-align: end;' }),
@@ -172,12 +193,10 @@ $(document).ready(function(){
 			for (index2 in data[index]['PH']) {
 				if (index2 >= dataIni && index2 <= dataFim) {
 					var cells = cellsTemplate.map(function(cell) { return cell.clone(); });
-					cells[0].text(data[index]['Tempo_execucao'][index2]);
-					cells[1].text(data[index]['Tempo_inativo'][index2]);
-					cells[2].text(formatDataBrz(index2));
-					cells[3].text(parseFloat(data[index]['Velocidade'][index2]).toFixed(1).replace('.', ','));
-					cells[4].text(parseFloat(data[index]['Temperatura'][index2]).toFixed(1).replace('.', ','));
-					cells[5].text(parseFloat(data[index]['PH'][index2]).toFixed(3).replace('.', ','));
+					cells[0].text(formatDataBrz(index2));
+					cells[1].text(parseFloat(data[index]['Velocidade'][index2]).toFixed(1).replace('.', ','));
+					cells[2].text(parseFloat(data[index]['Temperatura'][index2]).toFixed(1).replace('.', ','));
+					cells[3].text(parseFloat(data[index]['PH'][index2]).toFixed(3).replace('.', ','));
 					rows.push($('<tr>').append(cells));
 				}
 			}
@@ -219,9 +238,9 @@ $(document).ready(function(){
 			$('<td>', { text: row.ID_Dorna, style: 'width: 100px word-wrap: break-word;' }),
 			$('<td>', { text: formatDataBrz(row.dataMin, false), style: 'width: 150px' }),
 			$('<td>', { text: formatDataBrz(row.dataMax, false), style: 'width: 150px' }),
-			$('<td>', { text: row.Veloc_receita, style: 'width: 80px;text-align: end;' }),
-			$('<td>', { text: row.Temperatura_receita, style: 'width: 80px;text-align: end;' }),
-			$('<td>', { text: row.PH_receita, style: 'width: 80px;text-align: end;' })
+			$('<td>', { text: nroBraDecimais(row.Veloc_receita, 1), style: 'width: 80px;text-align: end;' }),
+			$('<td>', { text: nroBraDecimais(row.Temperatura_receita, 1), style: 'width: 80px;text-align: end;' }),
+			$('<td>', { text: nroBraDecimais(row.PH_receita, 3), style: 'width: 80px;text-align: end;' })
 		);
 
 		tbody.append(rowHtml);
@@ -237,12 +256,14 @@ $(document).ready(function(){
 					$('<th>', { text: 'Fase', style: 'width: 150px;  word-wrap: break-word;' }),
 					$('<th>', { text: 'Data inicial', style:'width: 150px;' }),
 					$('<th>', { text: 'Data final', style:'width: 150px;' }),
+					$('<th>', { text: 'Tempo de execução', style:'width: 150px;' })
 				),
 				$('<tbody>', { class: 'tableBody' }).append(
 					$('<tr>').append(
 						$('<td>', { text: i +'° '+row.fase, style: 'width: 150px;  word-wrap: break-word;' }),
 						$('<td>', { text: formatDataBrz(row.valorMin), style:'width: 150px;' }),
 						$('<td>', { text: formatDataBrz(row.valorMax), style:'width: 150px;' }),
+						$('<td>', { text: calcularTempoExecucao(formatDataBrz(row.valorMin), formatDataBrz(row.valorMax)), style:'width: 150px;' })
 					)
 				)
 			);
@@ -250,8 +271,6 @@ $(document).ready(function(){
 
 			let headerRowHtml = $('<table>', { class: 'table', 'id': 'tableFaseDados' + indiceGlobal + i}).append(
 				$('<thead>', { class: 'alert alert-secondary', role: 'alert'}).append(
-					$('<th>', { text: 'Tempo de execução', style: 'width: 100px;' }),
-					$('<th>', { text: 'Tempo de inatividade',  style: 'width: 100px;' }),
 					$('<th>', { text: 'Data e Hora' }),
 					$('<th>', { text: 'Rotação', style: 'width: 100px;text-align: end;' }),
 					$('<th>', { text: 'Temperatura', style: 'width: 150px;text-align: end;' }),
@@ -270,6 +289,33 @@ $(document).ready(function(){
 		buildAlarmeTable(row.Alarme);
 		indiceGlobal++;
 	}
+
+	function calcularTempoExecucao(dataInicialStr, dataFinalStr) {
+		// Convertendo as strings de datas em objetos Date
+		const dataInicial = new Date(dataInicialStr);
+		const dataFinal = new Date(dataFinalStr);
+
+		// Subtração das datas
+		const diferencaEmMilissegundos = dataFinal - dataInicial;
+
+		// Convertendo a diferença para o formato de horas, minutos, segundos e milissegundos
+		const horas = Math.floor(diferencaEmMilissegundos / (1000 * 60 * 60));
+		const minutos = Math.floor((diferencaEmMilissegundos % (1000 * 60 * 60)) / (1000 * 60));
+		const segundos = Math.floor((diferencaEmMilissegundos % (1000 * 60)) / 1000);
+		const milissegundos = diferencaEmMilissegundos % 1000;
+
+
+		let resultado = '';
+		if (horas > 0) {
+		  resultado += `${horas}h `;
+		}
+		if (minutos > 0) {
+		  resultado += `${minutos}m `;
+		}
+		resultado += `${segundos}s ${milissegundos}ms`;
+
+		return resultado.trim();
+	  }
 
 	$('#downloadPDF').on('click', function() {
 		exportarTabelaPDF();

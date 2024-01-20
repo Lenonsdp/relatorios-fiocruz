@@ -10,7 +10,7 @@ class RelatorioModel {
 		$connection = DB::connection('relatorio');
 		$sanitizedData = array_map('htmlspecialchars', $data);
 
-
+		// return '%' . $sanitizedData['operator'] . '%';
 		return $connection->table('StringTable')
 		->selectRaw('MIN(DateAndTime) as MinDate, MAX(DateAndTime) as MaxDate')
 			->when($sanitizedData['dateStart'] && $sanitizedData['dateEnd'], function ($query) use ($sanitizedData) {
@@ -18,10 +18,10 @@ class RelatorioModel {
 			})
 			->when($sanitizedData['lote'] || $sanitizedData['operator'], function ($query) use ($sanitizedData) {
 				return $query->where(function ($query) use ($sanitizedData) {
-					if ($sanitizedData['lote']) {
-						$query->orWhere('Val', 'LIKE', $sanitizedData['lote'])->where('TagIndex', 8);
-					} else if ($sanitizedData['operator']) {
-						$query->orWhere('Val', $sanitizedData['operator'])->where('TagIndex', 7);
+					if (!empty($sanitizedData['lote'])) {
+						$query->orWhere('Val', 'LIKE',  '%' .$sanitizedData['lote'] . '%')->where('TagIndex', 8);
+					} else if (!empty($sanitizedData['operator'])) {
+						$query->orWhere('Val', 'LIKE', '%' . $sanitizedData['operator'] . '%')->where('TagIndex', 7);
 					}
 				});
 			})
