@@ -22,7 +22,7 @@ class GetRelatorioService extends AbstractService {
 
 		$count = count($result_lotes);
 
-		if ($count > 1) {
+		if ($count > 1) {			
 			foreach($result_lotes as $result_lote) {
 				if ($result_lote->Val == null || empty(trim($result_lote->Val))) {
 					continue;
@@ -65,7 +65,6 @@ class GetRelatorioService extends AbstractService {
 	}
 
 	private function parserMultiplyLotes(&$result, $alias) {
-		// return $result;
 		foreach($result as $lote) {
 			foreach($lote['StringTable'] as $stringTable) {
 				if ($stringTable->DateAndTime >= $result[$alias]['dataMin'] && $stringTable->DateAndTime <= $result[$alias]['dataMax']) {
@@ -78,7 +77,9 @@ class GetRelatorioService extends AbstractService {
 				}
 			}
 		}
-
+		if (!isset($result[$alias]['DataIndex'])) {
+			return;
+		}
 		foreach($result[$alias]['DataIndex'] as $dataIndex) {
 			foreach($dataIndex as $data) {
 				if ($data->TagIndex == 4) {
