@@ -10,23 +10,17 @@ class GetRelatorioService extends AbstractService {
 
 	public function get(Array $data) {
 		$data['dateStart'] = $data['dateStart'] ? $this->formatDataBD($data['dateStart']) . ' 00:00:00' : '';
-		$data['dateEnd'] = $data['dateEnd'] ? $this->formatDataBD($data['dateEnd']) . ' 00:00:00' : '';
-
-
+		$data['dateEnd'] = $data['dateEnd'] ? $this->formatDataBD($data['dateEnd']) . ' 23:59:59' : '';
 		$result = [];
 		$manyLotes = false;
 		$result_datas = $this->relatorioModel->getDatasMinMaxStringTable($data);
+
 		if ($result_datas[0]->MinDate == null) {
 			return [];
 		}
-
 		$result_lotes = $this->relatorioModel->getDistinctLotes($result_datas[0]->MinDate, $result_datas[0]->MaxDate);
+
 		$count = count($result_lotes);
-		if ($count > 50) {
-			return ['manyLotesError' => true];
-		} else if ($count > 25) {
-			$manyLotes = true;
-		}
 
 		if ($count > 1) {
 			foreach($result_lotes as $result_lote) {
@@ -71,14 +65,15 @@ class GetRelatorioService extends AbstractService {
 	}
 
 	private function parserMultiplyLotes(&$result, $alias) {
+		// return $result;
 		foreach($result as $lote) {
 			foreach($lote['StringTable'] as $stringTable) {
-				if ($stringTable->DateAndTime > $result[$alias]['dataMin'] && $stringTable->DateAndTime < $result[$alias]['dataMax']) {
+				if ($stringTable->DateAndTime >= $result[$alias]['dataMin'] && $stringTable->DateAndTime <= $result[$alias]['dataMax']) {
 					$result[$alias]['DataIndex'][$stringTable->DateAndTime][] = $stringTable;
 				}
 			}
 			foreach($lote['FloatTable'] as $floatTable) {
-				if ($floatTable->DateAndTime > $result[$alias]['dataMin'] && $floatTable->DateAndTime < $result[$alias]['dataMax']) {
+				if ($floatTable->DateAndTime >= $result[$alias]['dataMin'] && $floatTable->DateAndTime <= $result[$alias]['dataMax']) {
 					$result[$alias]['DataIndex'][$floatTable->DateAndTime][] = $floatTable;
 				}
 			}
@@ -86,33 +81,33 @@ class GetRelatorioService extends AbstractService {
 
 		foreach($result[$alias]['DataIndex'] as $dataIndex) {
 			foreach($dataIndex as $data) {
-				if ($data->TagIndex == 0) {
+				if ($data->TagIndex == 4) {
 					$result[$alias]['Ciclo_ok_nok'] = $data->Val;
-				} else if ($data->TagIndex == 1) {
-					$result[$alias]['ID_Dorna'] = $data->Val;
-				} else if ($data->TagIndex == 13) {
-					$result[$alias]['Nome_receita'] = $data->Val;
-				} else if ($data->TagIndex == 7) {
-					$result[$alias]['NomeUsuario'] = $data->Val;
-				} else if ($data->TagIndex == 8) {
-					$result[$alias]['Num_Lote'] = $data->Val;
-				} else if ($data->TagIndex == 9) {
-					$result[$alias]['Fase'][$data->Val][] = $data->DateAndTime;
-				} else if ($data->TagIndex == 2) {
-					$result[$alias]['PH_receita'] = $data->Val;
-				} else if ($data->TagIndex == 3) {
-					$result[$alias]['Temperatura_receita'] = $data->Val;
-				} else if ($data->TagIndex == 4) {
-					$result[$alias]['Tempo_execucao'][$data->DateAndTime] = $data->Val;
 				} else if ($data->TagIndex == 5) {
-					$result[$alias]['Tempo_inativo'][$data->DateAndTime] = $data->Val;
-				} else if ($data->TagIndex == 6) {
-					$result[$alias]['Veloc_receita'] = $data->Val;
+					$result[$alias]['ID_Dorna'] = $data->Val;
+				} else if ($data->TagIndex == 3) {
+					$result[$alias]['Nome_receita'] = $data->Val;
+				} else if ($data->TagIndex == 0) {
+					$result[$alias]['NomeUsuario'] = $data->Val;
+				} else if ($data->TagIndex == 1) {
+					$result[$alias]['Num_Lote'] = $data->Val;
+				} else if ($data->TagIndex == 2) {
+					$result[$alias]['Fase'][$data->Val][] = $data->DateAndTime;
+				} else if ($data->TagIndex == 7) {
+					$result[$alias]['PH_receita'] = $data->Val;
+				} else if ($data->TagIndex == 9) {
+					$result[$alias]['Temperatura_receita'] = $data->Val;
 				} else if ($data->TagIndex == 10) {
-					$result[$alias]['PH'][$data->DateAndTime] = $data->Val;
+					$result[$alias]['Tempo_execucao'][$data->DateAndTime] = $data->Val;
 				} else if ($data->TagIndex == 11) {
-					$result[$alias]['Temperatura'][$data->DateAndTime] = $data->Val;
+					$result[$alias]['Tempo_inativo'][$data->DateAndTime] = $data->Val;
 				} else if ($data->TagIndex == 12) {
+					$result[$alias]['Veloc_receita'] = $data->Val;
+				} else if ($data->TagIndex == 6) {
+					$result[$alias]['PH'][$data->DateAndTime] = $data->Val;
+				} else if ($data->TagIndex == 8) {
+					$result[$alias]['Temperatura'][$data->DateAndTime] = $data->Val;
+				} else if ($data->TagIndex == 13) {
 					$result[$alias]['Velocidade'][$data->DateAndTime] = $data->Val;
 				}
 			}
@@ -134,33 +129,33 @@ class GetRelatorioService extends AbstractService {
 
 		foreach($result[$alias]['DataIndex'] as $dataIndex) {
 			foreach($dataIndex as $data) {
-				if ($data->TagIndex == 0) {
+				if ($data->TagIndex == 4) {
 					$result[$alias]['Ciclo_ok_nok'] = $data->Val;
-				} else if ($data->TagIndex == 1) {
-					$result[$alias]['ID_Dorna'] = $data->Val;
-				} else if ($data->TagIndex == 13) {
-					$result[$alias]['Nome_receita'] = $data->Val;
-				} else if ($data->TagIndex == 7) {
-					$result[$alias]['NomeUsuario'] = $data->Val;
-				} else if ($data->TagIndex == 8) {
-					$result[$alias]['Num_Lote'] = $data->Val;
-				} else if ($data->TagIndex == 9) {
-					$result[$alias]['Fase'][$data->Val][] = $data->DateAndTime;
-				} else if ($data->TagIndex == 2) {
-					$result[$alias]['PH_receita'] = $data->Val;
-				} else if ($data->TagIndex == 3) {
-					$result[$alias]['Temperatura_receita'] = $data->Val;
-				} else if ($data->TagIndex == 4) {
-					$result[$alias]['Tempo_execucao'][$data->DateAndTime] = $data->Val;
 				} else if ($data->TagIndex == 5) {
-					$result[$alias]['Tempo_inativo'][$data->DateAndTime] = $data->Val;
-				} else if ($data->TagIndex == 6) {
-					$result[$alias]['Veloc_receita'] = $data->Val;
+					$result[$alias]['ID_Dorna'] = $data->Val;
+				} else if ($data->TagIndex == 3) {
+					$result[$alias]['Nome_receita'] = $data->Val;
+				} else if ($data->TagIndex == 0) {
+					$result[$alias]['NomeUsuario'] = $data->Val;
+				} else if ($data->TagIndex == 1) {
+					$result[$alias]['Num_Lote'] = $data->Val;
+				} else if ($data->TagIndex == 2) {
+					$result[$alias]['Fase'][$data->Val][] = $data->DateAndTime;
+				} else if ($data->TagIndex == 7) {
+					$result[$alias]['PH_receita'] = $data->Val;
+				} else if ($data->TagIndex == 9) {
+					$result[$alias]['Temperatura_receita'] = $data->Val;
 				} else if ($data->TagIndex == 10) {
-					$result[$alias]['PH'][$data->DateAndTime] = $data->Val;
+					$result[$alias]['Tempo_execucao'][$data->DateAndTime] = $data->Val;
 				} else if ($data->TagIndex == 11) {
-					$result[$alias]['Temperatura'][$data->DateAndTime] = $data->Val;
+					$result[$alias]['Tempo_inativo'][$data->DateAndTime] = $data->Val;
 				} else if ($data->TagIndex == 12) {
+					$result[$alias]['Veloc_receita'] = $data->Val;
+				} else if ($data->TagIndex == 6) {
+					$result[$alias]['PH'][$data->DateAndTime] = $data->Val;
+				} else if ($data->TagIndex == 8) {
+					$result[$alias]['Temperatura'][$data->DateAndTime] = $data->Val;
+				} else if ($data->TagIndex == 13) {
 					$result[$alias]['Velocidade'][$data->DateAndTime] = $data->Val;
 				}
 			}

@@ -172,7 +172,7 @@ $(document).ready(function(){
 
 		Object.values(data).forEach(function (row) {
 			let rowHtml = $('<tr>').append(
-				$('<td>', { text: formatDataBrz(row.EventTimeStamp), style: 'width: 150px' }),
+				$('<td>', { text: formatDataBrz(row.EventTimeStamp, false), style: 'width: 150px' }),
 				$('<td>', { text: row.Message, style: 'width: 100px word-wrap: break-word;' }),
 				$('<td>', { text: row.ConditionName, style: 'width: 150px;  word-wrap: break-word;' }),
 			);
@@ -193,7 +193,7 @@ $(document).ready(function(){
 			for (index2 in data[index]['PH']) {
 				if (index2 >= dataIni && index2 <= dataFim) {
 					var cells = cellsTemplate.map(function(cell) { return cell.clone(); });
-					cells[0].text(formatDataBrz(index2));
+					cells[0].text(formatDataBrz(index2, false));
 					cells[1].text(parseFloat(data[index]['Velocidade'][index2]).toFixed(1).replace('.', ','));
 					cells[2].text(parseFloat(data[index]['Temperatura'][index2]).toFixed(1).replace('.', ','));
 					cells[3].text(parseFloat(data[index]['PH'][index2]).toFixed(3).replace('.', ','));
@@ -248,11 +248,11 @@ $(document).ready(function(){
 		let i = 1;
 		let tables = [];
 		$('#reportDataCabecalho').append(
-			$('<h5>', { text: 'Fases', style: 'text-align: center;', class: 'alert alert-secondary', role: 'alert', id: 'data-fase' + indiceGlobal })
+			$('<h5>', { text: 'Fases', style: 'text-align: center;background-color: #8d8d8db0;', class: 'alert alert-secondary', role: 'alert', id: 'data-fase' + indiceGlobal })
 		);
 		Object.values(fases).forEach(function (row) {
 			let headerRowHtmlFase = $('<table>', { class: 'table', 'id': 'tableFase' + indiceGlobal + i}).append(
-				$('<thead>', { class: 'alert alert-secondary', role: 'alert'}).append(
+				$('<thead>', { class: 'alert alert-secondary', role: 'alert', style: 'background-color: #8d8d8db0;'}).append(
 					$('<th>', { text: 'Fase', style: 'width: 150px;  word-wrap: break-word;' }),
 					$('<th>', { text: 'Data inicial', style:'width: 150px;' }),
 					$('<th>', { text: 'Data final', style:'width: 150px;' }),
@@ -261,8 +261,8 @@ $(document).ready(function(){
 				$('<tbody>', { class: 'tableBody' }).append(
 					$('<tr>').append(
 						$('<td>', { text: i +'° '+row.fase, style: 'width: 150px;  word-wrap: break-word;' }),
-						$('<td>', { text: formatDataBrz(row.valorMin), style:'width: 150px;' }),
-						$('<td>', { text: formatDataBrz(row.valorMax), style:'width: 150px;' }),
+						$('<td>', { text: formatDataBrz(row.valorMin, false), style:'width: 150px;' }),
+						$('<td>', { text: formatDataBrz(row.valorMax, false), style:'width: 150px;' }),
 						$('<td>', { text: calcularTempoExecucao(formatDataBrz(row.valorMin), formatDataBrz(row.valorMax)), style:'width: 150px;' })
 					)
 				)
@@ -291,32 +291,38 @@ $(document).ready(function(){
 	}
 
 	function calcularTempoExecucao(dataInicialStr, dataFinalStr) {
+		// Função para converter string de data para objeto Date
+		const converterParaData = (dataStr) => {
+			const [dataParte, horaParte] = dataStr.split(' ');
+			const [dia, mes, ano] = dataParte.split('/');
+			const [hora, minuto, segundo] = horaParte.split(':');
+
+			return new Date(ano, mes - 1, dia, hora, minuto, segundo);
+		};
+
 		// Convertendo as strings de datas em objetos Date
-		const dataInicial = new Date(dataInicialStr);
-		const dataFinal = new Date(dataFinalStr);
+		const dataInicial = converterParaData(dataInicialStr);
+		const dataFinal = converterParaData(dataFinalStr);
 
 		// Subtração das datas
 		const diferencaEmMilissegundos = dataFinal - dataInicial;
 
-		// Convertendo a diferença para o formato de horas, minutos, segundos e milissegundos
+		// Convertendo a diferença para o formato de horas, minutos, segundos
 		const horas = Math.floor(diferencaEmMilissegundos / (1000 * 60 * 60));
 		const minutos = Math.floor((diferencaEmMilissegundos % (1000 * 60 * 60)) / (1000 * 60));
 		const segundos = Math.floor((diferencaEmMilissegundos % (1000 * 60)) / 1000);
-		const milissegundos = diferencaEmMilissegundos % 1000;
-
 
 		let resultado = '';
 		if (horas > 0) {
-		  resultado += `${horas}h `;
+			resultado += `${horas}h `;
 		}
 		if (minutos > 0) {
-		  resultado += `${minutos}m `;
+			resultado += `${minutos}m `;
 		}
-		resultado += `${segundos}s ${milissegundos}ms`;
+		resultado += `${segundos}s`;
 
 		return resultado.trim();
-	  }
-
+	}
 	$('#downloadPDF').on('click', function() {
 		exportarTabelaPDF();
 	});
@@ -420,7 +426,6 @@ $(document).ready(function(){
 	}
 
 	function getDataTable3(indice) {
-		debugger
 		var data = [];
 		$('#tableFaseDados' + indice + 0).find('tbody tr').each(function() {
 			var row = [];
@@ -533,9 +538,9 @@ $(document).ready(function(){
 		var minutes = ("0" + date.getMinutes()).slice(-2);
 		var seconds = ("0" + date.getSeconds()).slice(-2);
 		var milliseconds = ("00" + date.getMilliseconds()).slice(-3);
-		if (returnMilliseconds) {
-			return day + "/" + month + "/" + year + " " + hours + ":" + minutes + ":" + seconds + "." + milliseconds;
-		}
+		// if (returnMilliseconds) {
+		// 	return day + "/" + month + "/" + year + " " + hours + ":" + minutes + ":" + seconds + "." + milliseconds;
+		// }
 		return day + "/" + month + "/" + year + " " + hours + ":" + minutes + ":" + seconds;
 	}
 
