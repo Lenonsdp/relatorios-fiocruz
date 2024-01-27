@@ -22,7 +22,7 @@ class GetRelatorioService extends AbstractService {
 
 		$count = count($result_lotes);
 
-		if ($count > 1) {			
+		if ($count > 1) {
 			foreach($result_lotes as $result_lote) {
 				if ($result_lote->Val == null || empty(trim($result_lote->Val))) {
 					continue;

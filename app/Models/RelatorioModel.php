@@ -9,6 +9,7 @@ class RelatorioModel {
 	public function getDatasMinMaxStringTable($data) {
 		$connection = DB::connection('relatorio');
 		$sanitizedData = array_map('htmlspecialchars', $data);
+
 		return $connection->table('StringTable')
 		->selectRaw('MIN(DateAndTime) as MinDate, MAX(DateAndTime) as MaxDate')
 			->when($sanitizedData['dateStart'] && $sanitizedData['dateEnd'], function ($query) use ($sanitizedData) {
@@ -17,9 +18,9 @@ class RelatorioModel {
 			->when($sanitizedData['lote'] || $sanitizedData['operator'], function ($query) use ($sanitizedData) {
 				return $query->where(function ($query) use ($sanitizedData) {
 					if (!empty($sanitizedData['lote'])) {
-						$query->orWhere('Val', 'LIKE',  '%' .$sanitizedData['lote'] . '%')->where('TagIndex', 1);
+						$query->orWhere('Val', $sanitizedData['lote'])->where('TagIndex', 1);
 					} else if (!empty($sanitizedData['operator'])) {
-						$query->orWhere('Val', 'LIKE', '%' . $sanitizedData['operator'] . '%')->where('TagIndex', 0);
+						$query->orWhere('Val', $sanitizedData['operator'])->where('TagIndex', 0);
 					}
 				});
 			})
@@ -61,9 +62,8 @@ class RelatorioModel {
 		$connection = DB::connection('relatorio');
 		return $connection->table('StringTable')
 			->select("*")
-			// ->selectRaw("CONVERT(VARCHAR, DateAndTime, 20) + ':' + CONVERT(VARCHAR, Millitm) AS DateAndTime, Val, TagIndex")
-			->where('DateAndTime', '>', $dataMin)
-			->where('DateAndTime', '<', $dataMax)
+			->where('DateAndTime', '>=', $dataMin)
+			->where('DateAndTime', '<=', $dataMax)
 			->get();
 	}
 
@@ -72,10 +72,9 @@ class RelatorioModel {
 	public function getDataFloatTable($dataMin, $dataMax) {
 		$connection = DB::connection('relatorio');
 		return 	$connection->table('FloatTable')
-		// ->selectRaw("CONVERT(VARCHAR, DateAndTime, 20) + ':' + CONVERT(VARCHAR, Millitm) AS DateAndTime, Val, TagIndex")
 			->select("*")
-			->where('DateAndTime', '>', $dataMin)
-			->where('DateAndTime', '<', $dataMax)
+			->where('DateAndTime', '>=', $dataMin)
+			->where('DateAndTime', '<=', $dataMax)
 			->get();
 	}
 
