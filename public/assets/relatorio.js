@@ -238,7 +238,7 @@ $(document).ready(function(){
 			$('<td>', { text: row.ID_Dorna, style: 'width: 100px word-wrap: break-word;' }),
 			$('<td>', { text: formatDataBrz(row.dataMin, false), style: 'width: 150px' }),
 			$('<td>', { text: formatDataBrz(row.dataMax, false), style: 'width: 150px' }),
-			$('<td>', { text: nroBraDecimais(row.Veloc_receita, 1), style: 'width: 80px;text-align: end;' }),
+			$('<td>', { text: nroBraDecimais(row.Veloc_receita, 0), style: 'width: 80px;text-align: end;' }),
 			$('<td>', { text: nroBraDecimais(row.Temperatura_receita, 1), style: 'width: 80px;text-align: end;' }),
 			$('<td>', { text: nroBraDecimais(row.PH_receita, 3), style: 'width: 80px;text-align: end;' })
 		);
