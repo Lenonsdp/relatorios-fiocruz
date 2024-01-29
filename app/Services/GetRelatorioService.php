@@ -82,7 +82,7 @@ class GetRelatorioService extends AbstractService {
 		}
 		foreach($result[$alias]['DataIndex'] as $dataIndex) {
 			foreach($dataIndex as $data) {
-				if ($data->TagIndex == 4) {
+				if ($data->TagIndex == 4 && $data->Marker == 'E') {
 					$result[$alias]['Ciclo_ok_nok'] = $data->Val;
 				} else if ($data->TagIndex == 5) {
 					$result[$alias]['ID_Dorna'] = $data->Val;
@@ -130,7 +130,7 @@ class GetRelatorioService extends AbstractService {
 
 		foreach($result[$alias]['DataIndex'] as $dataIndex) {
 			foreach($dataIndex as $data) {
-				if ($data->TagIndex == 4) {
+				if ($data->TagIndex == 4 && $data->Marker == 'E') {
 					$result[$alias]['Ciclo_ok_nok'] = $data->Val;
 				} else if ($data->TagIndex == 5) {
 					$result[$alias]['ID_Dorna'] = $data->Val;
