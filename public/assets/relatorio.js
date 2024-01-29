@@ -194,7 +194,7 @@ $(document).ready(function(){
 				if (index2 >= dataIni && index2 <= dataFim) {
 					var cells = cellsTemplate.map(function(cell) { return cell.clone(); });
 					cells[0].text(formatDataBrz(index2, false));
-					cells[1].text(parseFloat(data[index]['Velocidade'][index2]).toFixed(1).replace('.', ','));
+					cells[1].text(parseFloat(data[index]['Velocidade'][index2]).toFixed(0).replace('.', ','));
 					cells[2].text(parseFloat(data[index]['Temperatura'][index2]).toFixed(1).replace('.', ','));
 					cells[3].text(parseFloat(data[index]['PH'][index2]).toFixed(3).replace('.', ','));
 					rows.push($('<tr>').append(cells));
