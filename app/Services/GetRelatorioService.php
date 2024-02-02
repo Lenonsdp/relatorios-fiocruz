@@ -95,15 +95,15 @@ class GetRelatorioService extends AbstractService {
 				} else if ($data->TagIndex == 2) {
 					$result[$alias]['Fase'][$data->Val][] = $data->DateAndTime;
 				} else if ($data->TagIndex == 7) {
-					$result[$alias]['PH_receita'] = $data->Val;
+					$result[$alias]['PH_receita'][$data->DateAndTime][] = $data->Val;
 				} else if ($data->TagIndex == 9) {
-					$result[$alias]['Temperatura_receita'] = $data->Val;
+					$result[$alias]['Temperatura_receita'][$data->DateAndTime][] = $data->Val;
 				} else if ($data->TagIndex == 10) {
 					$result[$alias]['Tempo_execucao'][$data->DateAndTime] = $data->Val;
 				} else if ($data->TagIndex == 11) {
 					$result[$alias]['Tempo_inativo'][$data->DateAndTime] = $data->Val;
 				} else if ($data->TagIndex == 12) {
-					$result[$alias]['Veloc_receita'] = $data->Val;
+					$result[$alias]['Veloc_receita'][$data->DateAndTime][] = $data->Val;
 				} else if ($data->TagIndex == 6) {
 					$result[$alias]['PH'][$data->DateAndTime] = $data->Val;
 				} else if ($data->TagIndex == 8) {
@@ -143,15 +143,15 @@ class GetRelatorioService extends AbstractService {
 				} else if ($data->TagIndex == 2) {
 					$result[$alias]['Fase'][$data->Val][] = $data->DateAndTime;
 				} else if ($data->TagIndex == 7) {
-					$result[$alias]['PH_receita'] = $data->Val;
+					$result[$alias]['PH_receita'][$data->DateAndTime][] = $data->Val;
 				} else if ($data->TagIndex == 9) {
-					$result[$alias]['Temperatura_receita'] = $data->Val;
+					$result[$alias]['Temperatura_receita'][$data->DateAndTime][] = $data->Val;
 				} else if ($data->TagIndex == 10) {
 					$result[$alias]['Tempo_execucao'][$data->DateAndTime] = $data->Val;
 				} else if ($data->TagIndex == 11) {
 					$result[$alias]['Tempo_inativo'][$data->DateAndTime] = $data->Val;
 				} else if ($data->TagIndex == 12) {
-					$result[$alias]['Veloc_receita'] = $data->Val;
+					$result[$alias]['Veloc_receita'][$data->DateAndTime][] = $data->Val;
 				} else if ($data->TagIndex == 6) {
 					$result[$alias]['PH'][$data->DateAndTime] = $data->Val;
 				} else if ($data->TagIndex == 8) {
