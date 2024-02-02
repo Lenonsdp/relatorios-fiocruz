@@ -206,6 +206,20 @@ $(document).ready(function(){
 
 		return rows;
 	}
+
+	function getValueReceita(valor, row, data) {
+		if (valor == 'temperatura') {
+			return nroBraDecimais(data[row], 1);
+		}
+		if (valor == 'velocidade') {
+			return nroBraDecimais(data[row], 0);
+		}
+		if (valor == 'ph') {
+			return nroBraDecimais(data[row], 3);
+		}
+
+	}
+
 	function buildReportData(row, fases, data) {
 		$('#reportDataCabecalho').append(
 			$('<h5>', { text: 'Lote: ' + row.Num_Lote, class: 'alert alert-secondary', role:'alert', style: 'text-align: center;', id: 'data-lote' + indiceGlobal  })
@@ -221,10 +235,7 @@ $(document).ready(function(){
 			$('<th>', { text: 'Lote' }),
 			$('<th>', { text: 'Reator' }),
 			$('<th>', { text: 'Data inicial Batelada', style:'width: 150px;' }),
-			$('<th>', { text: 'Data final Batelada', style:'width: 150px;' }),
-			$('<th>', { text: 'Velocidade', style:'width: 80px;' }),
-			$('<th>', { text: 'Temperatura', style:'width: 100px;' }),
-			$('<th>', { text: 'PH', style:'width: 80px; text-align: end;' })
+			$('<th>', { text: 'Data final Batelada', style:'width: 150px;' })
 		];
 
 		tr.append(ths);
@@ -239,10 +250,7 @@ $(document).ready(function(){
 			$('<td>', { text: row.Num_Lote, style: 'width: 100px word-wrap: break-word;' }),
 			$('<td>', { text: row.ID_Dorna, style: 'width: 100px word-wrap: break-word;' }),
 			$('<td>', { text: formatDataBrz(row.dataMin, false), style: 'width: 150px' }),
-			$('<td>', { text: formatDataBrz(row.dataMax, false), style: 'width: 150px' }),
-			$('<td>', { text: nroBraDecimais(row.Veloc_receita, 0), style: 'width: 80px;text-align: end;' }),
-			$('<td>', { text: nroBraDecimais(row.Temperatura_receita, 1), style: 'width: 80px;text-align: end;' }),
-			$('<td>', { text: nroBraDecimais(row.PH_receita, 3), style: 'width: 80px;text-align: end;' })
+			$('<td>', { text: formatDataBrz(row.dataMax, false), style: 'width: 150px' })
 		);
 
 		tbody.append(rowHtml);
@@ -258,14 +266,20 @@ $(document).ready(function(){
 					$('<th>', { text: 'Fase', style: 'width: 150px;  word-wrap: break-word;' }),
 					$('<th>', { text: 'Data inicial', style:'width: 150px;' }),
 					$('<th>', { text: 'Data final', style:'width: 150px;' }),
-					$('<th>', { text: 'Tempo de execução', style:'width: 150px;' })
+					$('<th>', { text: 'Tempo de execução', style:'width: 150px;' }),
+					$('<th>', { text: 'Velocidade', style:'width: 80px; text-align: end;' }),
+					$('<th>', { text: 'Temperatura', style:'width: 100px; text-align: end;' }),
+					$('<th>', { text: 'PH', style:'width: 80px; text-align: end;' })
 				),
 				$('<tbody>', { class: 'tableBody' }).append(
 					$('<tr>').append(
 						$('<td>', { text: i +'° '+row.fase, style: 'width: 150px;  word-wrap: break-word;' }),
 						$('<td>', { text: formatDataBrz(row.valorMin, false), style:'width: 150px;' }),
 						$('<td>', { text: formatDataBrz(row.valorMax, false), style:'width: 150px;' }),
-						$('<td>', { text: calcularTempoExecucao(formatDataBrz(row.valorMin), formatDataBrz(row.valorMax)), style:'width: 150px;' })
+						$('<td>', { text: calcularTempoExecucao(formatDataBrz(row.valorMin), formatDataBrz(row.valorMax)), style:'width: 150px;' }),
+						$('<td>', { text: getValueReceita('velocidade', row.valorMin, data[row.lote].Veloc_receita), style: 'width: 80px;text-align: end;' }),
+						$('<td>', { text: getValueReceita('temperatura',row.valorMin, data[row.lote].Temperatura_receita), style: 'width: 80px;text-align: end;' }),
+						$('<td>', { text: getValueReceita('ph', row.valorMin, data[row.lote].PH_receita), style: 'width: 80px;text-align: end;' })
 					)
 				)
 			);
