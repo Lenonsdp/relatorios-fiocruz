@@ -133,7 +133,7 @@ $(document).ready(function(){
 		$('#reportTableBody, #reportDataCabecalho, #reportTableAlarme').empty();
 		for (index in data) {
 			for (index2 in data[index]['Fase']) {
-				if (index2.length) {
+				if (index2.trim().length) {
 					fases.push({'lote': index, 'fase': index2, 'valorMin': data[index]['Fase'][index2][0], 'valorMax': data[index]['Fase'][index2].pop()});
 				}
 			}
