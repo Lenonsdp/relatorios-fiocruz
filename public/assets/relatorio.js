@@ -211,7 +211,7 @@ $(document).ready(function(){
 		if (valor == 'temperatura') {
 			return nroBraDecimais(data[row], 1);
 		}
-		if (valor == 'velocidade') {
+		if (valor == 'rotacao') {
 			return nroBraDecimais(data[row], 0);
 		}
 		if (valor == 'ph') {
@@ -267,7 +267,7 @@ $(document).ready(function(){
 					$('<th>', { text: 'Data inicial', style:'width: 150px;' }),
 					$('<th>', { text: 'Data final', style:'width: 150px;' }),
 					$('<th>', { text: 'Tempo de execução', style:'width: 150px;' }),
-					$('<th>', { text: 'Velocidade', style:'width: 80px; text-align: end;' }),
+					$('<th>', { text: 'Rotação', style:'width: 80px; text-align: end;' }),
 					$('<th>', { text: 'Temperatura', style:'width: 100px; text-align: end;' }),
 					$('<th>', { text: 'PH', style:'width: 80px; text-align: end;' })
 				),
@@ -277,7 +277,7 @@ $(document).ready(function(){
 						$('<td>', { text: formatDataBrz(row.valorMin, false), style:'width: 150px;' }),
 						$('<td>', { text: formatDataBrz(row.valorMax, false), style:'width: 150px;' }),
 						$('<td>', { text: calcularTempoExecucao(formatDataBrz(row.valorMin), formatDataBrz(row.valorMax)), style:'width: 150px;' }),
-						$('<td>', { text: getValueReceita('velocidade', row.valorMin, data[row.lote].Veloc_receita), style: 'width: 80px;text-align: end;' }),
+						$('<td>', { text: getValueReceita('rotacao', row.valorMin, data[row.lote].Veloc_receita), style: 'width: 80px;text-align: end;' }),
 						$('<td>', { text: getValueReceita('temperatura',row.valorMin, data[row.lote].Temperatura_receita), style: 'width: 80px;text-align: end;' }),
 						$('<td>', { text: getValueReceita('ph', row.valorMin, data[row.lote].PH_receita), style: 'width: 80px;text-align: end;' })
 					)
@@ -367,7 +367,7 @@ $(document).ready(function(){
 				dataKey: 6, title: "Data final Batelada", type: "text"
 			},
 			{
-				dataKey: 7, title: "Velocidade", type: "text"
+				dataKey: 7, title: "Rotação", type: "text"
 			},
 			{
 				dataKey: 8, title: "Temperatura", type: "text"
