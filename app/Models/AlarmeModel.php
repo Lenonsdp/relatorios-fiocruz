@@ -8,6 +8,11 @@ class AlarmeModel {
 
 	public function getDataAlarmeTable($dataMin, $dataMax) {
 		$connection = DB::connection('alarme');
+
+		// Subtract 3 hours from $dataMin and $dataMax
+		$dataMin = now()->parse($dataMin)->subHours(3);
+		$dataMax = now()->parse($dataMax)->subHours(3);
+
 		return $connection->table('AllEvent')
 			->select(
 				'ServerName',
