@@ -163,8 +163,7 @@ $(document).ready(function(){
 			$('<thead>').append(
 				$('<tr>', { class: 'alert alert-secondary', role:'alert'}).append(
 					$('<th>', { text: 'Data' }),
-					$('<th>', { text: 'Mensagem' }),
-					$('<th>', { text: 'Condição' })
+					$('<th>', { text: 'Mensagem' })
 				)
 			),
 			$('<tbody>', { class: 'reportTableAlarmeBody'})
@@ -174,9 +173,8 @@ $(document).ready(function(){
 
 		Object.values(data).forEach(function (row) {
 			let rowHtml = $('<tr>').append(
-				$('<td>', { text: formatDataBrz(row.EventTimeStamp, false), style: 'width: 150px' }),
-				$('<td>', { text: row.Message, style: 'width: 100px word-wrap: break-word;' }),
-				$('<td>', { text: row.ConditionName, style: 'width: 150px;  word-wrap: break-word;' }),
+				$('<td>', { text: formatDataBrz(row.EventTimeStamp, false), style: 'width: 250px' }),
+				$('<td>', { text: row.Message, style: 'width: 600px word-wrap: break-word;' })
 			);
 
 			$('.reportTableAlarmeBody').append(rowHtml);
@@ -338,212 +336,7 @@ $(document).ready(function(){
 		resultado += `${segundos}s`;
 
 		return resultado.trim();
-	}
-	$('#downloadPDF').on('click', function() {
-		exportarTabelaPDF();
-	});
-
-	function getHearderTable1() {
-		return [
-			{
-				dataKey: 0, title: "Usuário", type: "text"
-			},
-			{
-				dataKey: 1, title: "Status ciclo", type: "text"
-			},
-			{
-				dataKey: 2, title: "Receita", type: "text"
-			},
-			{
-				dataKey: 3, title: "Lote", type: "text"
-			},
-			{
-				dataKey: 4, title: "Reator", type: "text"
-			},
-			{
-				dataKey: 5, title: "Data inicial Batelada", type: "text"
-			},
-			{
-				dataKey: 6, title: "Data final Batelada", type: "text"
-			},
-			{
-				dataKey: 7, title: "Rotação", type: "text"
-			},
-			{
-				dataKey: 8, title: "Temperatura", type: "text"
-			},
-			{
-				dataKey: 9, title: "PH", type: "text"
-			}
-		];
-	}
-
-	function getHeaderTable2() {
-		return [
-			{
-				dataKey: 0, title: "Fase", type: "text"
-			},
-			{
-				dataKey: 1, title: "Data inicial", type: "text"
-			},
-			{
-				dataKey: 2, title: "Data final", type: "text"
-			}
-		];
-	}
-
-	function getHeaderTable3() {
-		return [
-			{
-				dataKey: 0, title: "Tempo de execução", type: "text"
-			},
-			{
-				dataKey: 1, title: "Tempo de inatividade", type: "text"
-			},
-			{
-				dataKey: 2, title: "Data e Hora", type: "text"
-			},
-			{
-				dataKey: 3, title: "Rotação", type: "text"
-			},
-			{
-				dataKey: 4, title: "Temperatura", type: "text"
-			},
-			{
-				dataKey: 5, title: "PH", type: "text"
-			}
-		]
-	}
-
-	function getDataTable1(indice) {
-		var data = [];
-
-		$('#data-table-cabecalho' + indice).find('tbody tr').each(function() {
-			var row = [];
-			$(this).find('td').each(function() {
-				row.push($(this).text());
-			});
-			data.push(row);
-		});
-		return data;
-	}
-
-	function getDataTable2(indice) {
-		var data = [];
-		$('#tableFase' + indice + 0).find('tbody tr').each(function() {
-			var row = [];
-			$(this).find('td').each(function() {
-				row.push($(this).text());
-			});
-			data.push(row);
-		});
-
-		return data;
-	}
-
-	function getDataTable3(indice) {
-		var data = [];
-		$('#tableFaseDados' + indice + 0).find('tbody tr').each(function() {
-			var row = [];
-			$(this).find('td').each(function() {
-				row.push($(this).text());
-			});
-			data.push(row);
-		});
-		return data;
-	}
-
-	function exportarTabelaPDF() {
-		var columns = [];
-		var columnAlign = [];
-		var alignCol = [];
-		var doc = new jsPDF('l', 'pt', 'a4');
-		for (let i = 0; i < indiceGlobal; i++) {
-			const tableData1 = [
-				getHearderTable1(),
-				...getDataTable1(i),
-			];
-
-			const tableData2 = [
-				getHeaderTable2(),
-				...getDataTable2(i)
-			];
-
-
-			const tableData3 = [
-				getHeaderTable3(),
-				...getDataTable3(i)
-			]
-
-			doc = createTable(doc, tableData1, 10, i * 4 * 10);
-			doc = createTable(doc, tableData2, 10, i * 4 * 100);
-			doc = createTable(doc, tableData3, 10, i * 4 * 300);
-		}
-
-		doc.save('table.pdf');
-
-		return;
-		var inicio = 20;
-		orientacao = ('l') //p porta retrato l paisagem;
-		var pdf = new jsPDF(orientacao, 'pt', 'a4');
-		if (false) {
-			pdf.addImage(header, 'jpeg', Math.round((pdf.internal.pageSize.width - dimensao.width) / 2), inicio, dimensao.width, dimensao.height);
-			inicio += 130;
-		}
-
-		// if (titulo) {
-		// 	pdf.setFontSize(14);
-		// 	var textWidth = pdf.getStringUnitWidth(titulo) * pdf.internal.getFontSize() / pdf.internal.scaleFactor;
-		// 	var textOffset = (pdf.internal.pageSize.width - textWidth) / 2;
-		// 	pdf.text(textOffset, inicio, titulo);
-		// 	inicio += 10;
-		// }
-
-		pdf.autoTable(columns, data, {
-			theme: 'grid',
-			startY: inicio,
-			headerStyles: {
-				fillColor: [187,187,187],
-				textColor: 255,
-				rowHeight: 15,
-				valign: 'middle'
-			},
-			styles: {
-				overflow: 'linebreak',
-				fontSize: 8,
-			},
-			columnStyles: alignCol,
-			margin: 20
-		});
-
-		if (!fileName) {
-			fileName = 'exportacao-' + new Date().toJSON().slice(0,10);
-		}
-
-		pdf.save(fileName + '.pdf');
-	}
-
-	// Função para criar uma tabela usando jsPDF
-	function createTable(doc, data, x, y) {
-		const margin = 10;
-
-		doc.autoTable(data[0], data.slice(1), {
-			theme: 'grid',
-			startY: y + margin,
-			headerStyles: {
-				fillColor: [187,187,187],
-				textColor: 255,
-				rowHeight: 15,
-				valign: 'middle'
-			},
-			styles: {
-				overflow: 'linebreak',
-				fontSize: 8,
-			},
-			margin: 10
-		});
-		return doc;
-	}
+	}	
 
 	function formatDataBrz(dt, returnMilliseconds = true) {
 		var date = new Date(dt);

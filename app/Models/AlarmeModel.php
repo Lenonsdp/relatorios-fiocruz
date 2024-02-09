@@ -15,7 +15,7 @@ class AlarmeModel {
 		return $connection->table('AllEvent')
 			->select(
 				'ServerName',
-				'EventTimeStamp',
+				 DB::raw('DATEADD(HOUR, -3, EventTimeStamp) as EventTimeStamp'),
 				'EventCategory',
 				'severity',
 				'Message',
