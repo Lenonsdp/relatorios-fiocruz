@@ -194,9 +194,9 @@ $(document).ready(function(){
 				if (index2 >= dataIni && index2 <= dataFim) {
 					var cells = cellsTemplate.map(function(cell) { return cell.clone(); });
 					cells[0].text(formatDataBrz(index2, false));
-					cells[1].text(parseInt(data[index]['Velocidade'][index2]));
-					cells[2].text(parseFloat(data[index]['Temperatura'][index2]).toFixed(1).replace('.', ','));
-					cells[3].text(parseFloat(data[index]['PH'][index2]).toFixed(3).replace('.', ','));
+					cells[1].text(parseInt(data[index]['Velocidade'][index2]) + '%');
+					cells[2].text(parseFloat(data[index]['Temperatura'][index2]).toFixed(1).replace('.', ',') + '°C');
+					cells[3].text(parseFloat(data[index]['PH'][index2]).toFixed(2).replace('.', ',') + ' pH');
 					rows.push($('<tr>').append(cells));
 				}
 			}
@@ -205,15 +205,15 @@ $(document).ready(function(){
 		return rows;
 	}
 
-	function getValueReceita(valor, row, data) {
+	function getValueReceita(valor, row, data, data2) {
 		if (valor == 'temperatura') {
-			return nroBraDecimais(data[row], 1);
+			return 'de ' + nroBraDecimais(data[row], 1) + '°C a ' + nroBraDecimais(data2[row], 1) + '°C';
 		}
 		if (valor == 'rotacao') {
-			return nroBraDecimais(data[row], 0);
+			return nroBraDecimais(data[row], 0)+'%';
 		}
 		if (valor == 'ph') {
-			return nroBraDecimais(data[row], 3);
+			return 'de ' + nroBraDecimais(data[row], 2) + ' a ' + nroBraDecimais(data2[row], 2);
 		}
 
 	}
@@ -261,23 +261,23 @@ $(document).ready(function(){
 		Object.values(fases).forEach(function (row) {
 			let headerRowHtmlFase = $('<table>', { class: 'table', 'id': 'tableFase' + indiceGlobal + i}).append(
 				$('<thead>', { class: 'alert alert-secondary', role: 'alert', style: 'background-color: #8d8d8db0;'}).append(
-					$('<th>', { text: 'Fase', style: 'width: 150px;  word-wrap: break-word;' }),
-					$('<th>', { text: 'Data inicial', style:'width: 150px;' }),
-					$('<th>', { text: 'Data final', style:'width: 150px;' }),
-					$('<th>', { text: 'Tempo de execução', style:'width: 150px;' }),
-					$('<th>', { text: 'Rotação', style:'width: 80px; text-align: end;' }),
-					$('<th>', { text: 'Temperatura', style:'width: 100px; text-align: end;' }),
-					$('<th>', { text: 'PH', style:'width: 80px; text-align: end;' })
+					$('<th>', { text: 'Fase', style: 'width: 180px;  word-wrap: break-word;' }),
+					$('<th>', { text: 'Data inicial', style:'width: 180px;' }),
+					$('<th>', { text: 'Data final', style:'width: 180px;' }),
+					$('<th>', { text: 'Tempo de execução', style:'width: 200px;' }),
+					$('<th>', { text: 'Amplitude', style:'width: 15px; text-align: end;' }),
+					$('<th>', { text: 'Temperatura', style:'width: 180px; text-align: end;' }),
+					$('<th>', { text: 'pH', style:'width: 100px; text-align: end;' })
 				),
 				$('<tbody>', { class: 'tableBody' }).append(
 					$('<tr>').append(
-						$('<td>', { text: i +'° '+row.fase, style: 'width: 150px;  word-wrap: break-word;' }),
-						$('<td>', { text: formatDataBrz(row.valorMin, false), style:'width: 150px;' }),
-						$('<td>', { text: formatDataBrz(row.valorMax, false), style:'width: 150px;' }),
-						$('<td>', { text: calcularTempoExecucao(formatDataBrz(row.valorMin), formatDataBrz(row.valorMax)), style:'width: 150px;' }),
-						$('<td>', { text: getValueReceita('rotacao', row.valorMin, data[row.lote].Veloc_receita), style: 'width: 80px;text-align: end;' }),
-						$('<td>', { text: getValueReceita('temperatura',row.valorMin, data[row.lote].Temperatura_receita), style: 'width: 80px;text-align: end;' }),
-						$('<td>', { text: getValueReceita('ph', row.valorMin, data[row.lote].PH_receita), style: 'width: 80px;text-align: end;' })
+						$('<td>', { text: i +'° '+row.fase, style: 'width: 180px;  word-wrap: break-word;' }),
+						$('<td>', { text: formatDataBrz(row.valorMin, false), style:'width: 180px;' }),
+						$('<td>', { text: formatDataBrz(row.valorMax, false), style:'width: 180px;' }),
+						$('<td>', { text: calcularTempoExecucao(formatDataBrz(row.valorMin), formatDataBrz(row.valorMax)), style:'width: 30px;' }),
+						$('<td>', { text: getValueReceita('rotacao', row.valorMin, data[row.lote].Veloc_receita, ''), style: 'width: 15px;text-align: end;' }),
+						$('<td>', { text: getValueReceita('temperatura',row.valorMin, data[row.lote].Temperatura_receita_min, data[row.lote].Temperatura_receita_max), style: 'width: 180px;text-align: end;' }),
+						$('<td>', { text: getValueReceita('ph', row.valorMin, data[row.lote].PH_receita_min, data[row.lote].PH_receita_max), style: 'width: 150px;text-align: end;' })
 					)
 				)
 			);
@@ -286,9 +286,9 @@ $(document).ready(function(){
 			let headerRowHtml = $('<table>', { class: 'table', 'id': 'tableFaseDados' + indiceGlobal + i}).append(
 				$('<thead>', { class: 'alert alert-secondary', role: 'alert'}).append(
 					$('<th>', { text: 'Data e Hora' }),
-					$('<th>', { text: 'Rotação', style: 'width: 100px;text-align: end;' }),
+					$('<th>', { text: 'Amplitude', style: 'width: 100px;text-align: end;' }),
 					$('<th>', { text: 'Temperatura', style: 'width: 150px;text-align: end;' }),
-					$('<th>', { text: 'PH', style: 'width: 100px; text-align: end;' })
+					$('<th>', { text: 'pH', style: 'width: 100px; text-align: end;' })
 				),
 				$('<tbody>', { class: 'tableBody' }).append(
 					getValueRow(row.fase, row.valorMin, row.valorMax, data, i)
@@ -336,7 +336,7 @@ $(document).ready(function(){
 		resultado += `${segundos}s`;
 
 		return resultado.trim();
-	}	
+	}
 
 	function formatDataBrz(dt, returnMilliseconds = true) {
 		var date = new Date(dt);
