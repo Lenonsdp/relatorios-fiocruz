@@ -14,12 +14,10 @@ class GetRelatorioService extends AbstractService {
 		$result = [];
 		$manyLotes = false;
 		$result_datas = $this->relatorioModel->getDatasMinMaxStringTable($data);
-
 		if ($result_datas[0]->MinDate == null) {
 			return [];
 		}
 		$result_lotes = $this->relatorioModel->getDistinctLotes($result_datas[0]->MinDate, $result_datas[0]->MaxDate);
-
 		$count = count($result_lotes);
 
 		if ($count > 1) {
@@ -28,7 +26,7 @@ class GetRelatorioService extends AbstractService {
 					continue;
 				}
 				$resultMultipleLotesData = [];
-				$resultMultipleLotesData = $this->relatorioModel->getDatasMinMaxStringTableVal($result_lote->Val);
+				$resultMultipleLotesData = $this->relatorioModel->getDatasMinMaxStringTableVal($result_lote->Val, $result_datas[0]->MinDate, $result_datas[0]->MaxDate);
 				$alias = $result_lote->Val;
 				$result[$alias]['StringTable'] = $this->relatorioModel->getDataStringTable($resultMultipleLotesData[0]->MinDate, $resultMultipleLotesData[0]->MaxDate);
 

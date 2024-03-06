@@ -9,8 +9,8 @@ class AlarmeModel {
 	public function getDataAlarmeTable($dataMin, $dataMax) {
 		$connection = DB::connection('alarme');
 
-		$dataMin = now()->parse($dataMin)->addHours(3);
-		$dataMax = now()->parse($dataMax)->addHours(3);
+		$dataMin = now()->parse($dataMin)->addHours(3)->addSeconds(5);
+		$dataMax = now()->parse($dataMax)->addHours(3)->addSeconds(5);
 
 		return $connection->table('AllEvent')
 			->select(

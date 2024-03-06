@@ -185,9 +185,9 @@ $(document).ready(function(){
 		var rows = [];
 		var cellsTemplate = [
 			$('<td>', { style:'width: 150px;' }),
-			$('<td>', { style: 'width: 100px;text-align: end;' }),
-			$('<td>', { style: 'width: 100px;text-align: end;' }),
-			$('<td>', { style: 'width: 100px;text-align: end;' })
+			$('<td>', { style: 'width: 100px;' }),
+			$('<td>', { style: 'width: 100px;' }),
+			$('<td>', { style: 'width: 100px;' })
 		];
 		for (index in data) {
 			for (index2 in data[index]['PH']) {
@@ -213,7 +213,7 @@ $(document).ready(function(){
 			return nroBraDecimais(data[row], 0)+'%';
 		}
 		if (valor == 'ph') {
-			return 'de ' + nroBraDecimais(data[row], 2) + ' a ' + nroBraDecimais(data2[row], 2);
+			return 'de ' + nroBraDecimais(data[row], 2) + ' pH a ' + nroBraDecimais(data2[row], 2) + ' pH';
 		}
 
 	}
@@ -264,10 +264,10 @@ $(document).ready(function(){
 					$('<th>', { text: 'Fase', style: 'width: 180px;  word-wrap: break-word;' }),
 					$('<th>', { text: 'Data inicial', style:'width: 180px;' }),
 					$('<th>', { text: 'Data final', style:'width: 180px;' }),
-					$('<th>', { text: 'Tempo de execução', style:'width: 200px;' }),
-					$('<th>', { text: 'Amplitude', style:'width: 15px; text-align: end;' }),
-					$('<th>', { text: 'Temperatura', style:'width: 180px; text-align: end;' }),
-					$('<th>', { text: 'pH', style:'width: 100px; text-align: end;' })
+					$('<th>', { text: 'Tempo de execução', style:'width: 100px;' }),
+					$('<th>', { text: 'Amplitude', style:'width: 15px;' }),
+					$('<th>', { text: 'Temperatura', style:'width: 180px;' }),
+					$('<th>', { text: 'pH', style:'width: 180px;' })
 				),
 				$('<tbody>', { class: 'tableBody' }).append(
 					$('<tr>').append(
@@ -275,9 +275,9 @@ $(document).ready(function(){
 						$('<td>', { text: formatDataBrz(row.valorMin, false), style:'width: 180px;' }),
 						$('<td>', { text: formatDataBrz(row.valorMax, false), style:'width: 180px;' }),
 						$('<td>', { text: calcularTempoExecucao(formatDataBrz(row.valorMin), formatDataBrz(row.valorMax)), style:'width: 30px;' }),
-						$('<td>', { text: getValueReceita('rotacao', row.valorMin, data[row.lote].Veloc_receita, ''), style: 'width: 15px;text-align: end;' }),
-						$('<td>', { text: getValueReceita('temperatura',row.valorMin, data[row.lote].Temperatura_receita_min, data[row.lote].Temperatura_receita_max), style: 'width: 180px;text-align: end;' }),
-						$('<td>', { text: getValueReceita('ph', row.valorMin, data[row.lote].PH_receita_min, data[row.lote].PH_receita_max), style: 'width: 150px;text-align: end;' })
+						$('<td>', { text: getValueReceita('rotacao', row.valorMin, data[row.lote].Veloc_receita, ''), style: 'width: 15px;' }),
+						$('<td>', { text: getValueReceita('temperatura',row.valorMin, data[row.lote].Temperatura_receita_min, data[row.lote].Temperatura_receita_max), style: 'width: 180px;' }),
+						$('<td>', { text: getValueReceita('ph', row.valorMin, data[row.lote].PH_receita_min, data[row.lote].PH_receita_max), style: 'width: 180px;' })
 					)
 				)
 			);
@@ -286,9 +286,9 @@ $(document).ready(function(){
 			let headerRowHtml = $('<table>', { class: 'table', 'id': 'tableFaseDados' + indiceGlobal + i}).append(
 				$('<thead>', { class: 'alert alert-secondary', role: 'alert'}).append(
 					$('<th>', { text: 'Data e Hora' }),
-					$('<th>', { text: 'Amplitude', style: 'width: 100px;text-align: end;' }),
-					$('<th>', { text: 'Temperatura', style: 'width: 150px;text-align: end;' }),
-					$('<th>', { text: 'pH', style: 'width: 100px; text-align: end;' })
+					$('<th>', { text: 'Amplitude', style: 'width: 100px;' }),
+					$('<th>', { text: 'Temperatura', style: 'width: 150px;' }),
+					$('<th>', { text: 'pH', style: 'width: 100px;' })
 				),
 				$('<tbody>', { class: 'tableBody' }).append(
 					getValueRow(row.fase, row.valorMin, row.valorMax, data, i)

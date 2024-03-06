@@ -47,11 +47,13 @@ class RelatorioModel {
 			->get();
 	}
 
-	public function getDatasMinMaxStringTableVal($val) {
+	public function getDatasMinMaxStringTableVal($val, $dataMin, $dataMax) {
 		$connection = DB::connection('relatorio');
 		return 	$connection->table('StringTable')
 			->selectRaw('MIN(DateAndTime) as MinDate, MAX(DateAndTime) as MaxDate')
 			->where('Val', 'LIKE', $val)
+			->where('DateAndTime', '>=', $dataMin)
+			->where('DateAndTime', '<=', $dataMax)
 			->where('TagIndex', 1)
 			->get();
 
